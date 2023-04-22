@@ -45,24 +45,25 @@ async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
 }
 
 export default async function Ranking({ params }: { params: { id: string } }) {
-	const ranking = await prisma.ranking.findUnique({
-		select: {
-			name: true,
-			description: true,
-			user: true,
-			RankingItem: {
-				orderBy: {
-					globalElo: "desc"
-				}
-			}
-		},
-		where: {
-			id: params.id
-		}
-	});
+    const ranking = await prisma.ranking.findUnique({
+        select: {
+            name: true,
+            description: true,
+            user: true,
+            RankingItem: {
+                orderBy: {
+                    globalElo: "desc"
+                }
+            }
+        },
+        where: {
+            id: params.id
+        }
+    });
 
-	if (!ranking) notFound();
-	const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
+    if (!ranking) notFound();
+
+    const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
 
 	return (
 		<div className='mx-auto container flex flex-col gap-4'>
@@ -80,7 +81,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 						return { elo: item.globalElo, name: item.text }
 					})
 				} />
-
+        
 			</aside>
 
 			<div className="mr-40">
