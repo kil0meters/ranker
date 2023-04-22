@@ -1,9 +1,7 @@
+import { prisma } from "@/dbconfig";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import NextAuth, { AuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github"
-
-const prisma = new PrismaClient();
 
 export const authOptions: AuthOptions = {
     session: {
@@ -18,4 +16,6 @@ export const authOptions: AuthOptions = {
     ],
 };
 
-export default NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };

@@ -1,13 +1,45 @@
-//import { GuessButton } from '@/components/guess-button';
-//import { config } from '@/dbconfig'
-//import { connect } from '@planetscale/database'
-//import { PrismaClient } from '@prisma/client';
-import { ShowEntries } from '@/components/entries';
+import { prisma } from "@/dbconfig";
+import Link from "next/link";
+
+export async function ShowEntries() {
+    const entries = await prisma.ranking.findMany({
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            user: true,
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+        take: 10,
+    });
+
+    return (
+        <div className='grid grid-cols-1 grid-flow-row border-neutral-300 rounded border'>
+            {entries.map((entry, index) => (
+                <Link className='border-b last:border-b-0 border-neutral-300 p-4 w-full hover:bg-neutral-100 transition-all' key={index} href={"/rank/" + entry.id}>
+                    <span className='font-bold text-lg'>
+                        {entry.name}
+                    </span>
+                    <div className='text-sm text-neutral-500 mb-2'>
+                        {entry.user.name}
+                    </div>
+
+                    <div className='text text-neutral-700'>
+                        {entry.description}
+                    </div>
+                </Link>
+            ))}
+        </div>
+    );
+}
+
 
 export default function Home() {
     return (
         <main className="container mx-auto">
-			<ShowEntries />
+            <ShowEntries />
         </main>
     );
 }

@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/dbconfig';
+import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 const schema = z.object({
     name: z.string(),
@@ -11,6 +10,21 @@ const schema = z.object({
 });
 
 export async function POST(res: Request) {
+    const session = await getServerSession();
+    if (!(session?.user?.email)) return NextResponse.error();
+
+    const idres = await prisma.user.findUnique({
+        select: {
+            id: true,
+        },
+        where: {
+            email: session.user.email
+        }
+    });
+
+    if (!idres) return NextResponse.error();
+    const { id } = idres;
+
     const data = schema.parse(await res.json());
 
     const rankingItems: { text: string }[] = [];
@@ -22,6 +36,7 @@ export async function POST(res: Request) {
         data: {
             name: data.name,
             description: data.description,
+            userId: id,
 
             RankingItem: {
                 createMany: {

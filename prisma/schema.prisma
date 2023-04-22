@@ -38,10 +38,12 @@ model User {
     emailVerified DateTime?
     image         String?
     accounts      Account[]
+    Ranking       Ranking[]
 }
 
 model Ranking {
     id          String  @id @unique @default(cuid())
+    userId      String
     name        String  @db.VarChar(200)
     description String? @db.Text
     popularity  Int     @default(1)
@@ -49,7 +51,11 @@ model Ranking {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
     RankingItem RankingItem[]
+
+    @@index([userId])
 }
 
 model RankingItem {

@@ -24,4 +24,3 @@ export function GuessButton({ index, text }: { index: number, text: string }) {
         </button>
     );
 }
-
