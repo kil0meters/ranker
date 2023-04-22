@@ -1,0 +1,16 @@
+import { GuessButton } from '@/components/guess-button';
+import { config } from '@/dbconfig'
+import { connect } from '@planetscale/database'
+import Link from 'next/link';
+import { SigninButton } from './signin-button';
+
+export default function SigninPage() {
+    return (
+        <main className="container mx-auto">
+            <div className='flex grid-cols-2 gap-4 border-neutral-300 rounded p-4 flex-col border'>
+                <h1 className='text-lg'>Sign in</h1>
+                <SigninButton provider='github' providerStyle="GitHub" />
+            </div>
+        </main>
+    )
+}
