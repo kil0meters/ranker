@@ -131,8 +131,6 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 
     if (!ranking) notFound();
 
-    // const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
-
     return (
         <div className='mx-auto container flex flex-col gap-4'>
             <div>
