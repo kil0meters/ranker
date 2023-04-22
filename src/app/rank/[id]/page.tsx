@@ -66,7 +66,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
     const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
 
 	return (
-		<div className='mx-auto container flex flex-col gap-4'>
+		<div className='mx-auto container flex flex-col gap-4 rounded border border-b p-4'>
 			<aside className="w-auto w-max:10rem bg-blue-500 fixed top-16 right-2 mt-4">
 				<div>
 					<h1 className='text-2xl font-extrabold'>
@@ -85,7 +85,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 			</aside>
 
 			<div className="mr-40">
-				<div>
+				<div className='pb-4'>
 					<h1 className='text-2xl font-extrabold'>
 						{ranking.name}
 					</h1>
@@ -98,9 +98,9 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 					<GuessButton rankingId={params.id} options={options} index={0} />
 					<GuessButton rankingId={params.id} options={options} index={1} />
 				</div>
-				<p>
+				<div className='py-4'>
 					{ranking.description}
-				</p>
+				</div>
 				<LocalLeaderboard rankingId={params.id} />
 			</div>
 
