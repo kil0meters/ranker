@@ -83,6 +83,9 @@ async function GuessButtons({ rankingId }: { rankingId: string }) {
         let options = await prisma.$transaction([
             prisma.rankingItem.findFirst({
                 skip: pair[0],
+                where: {
+                    rankingId
+                },
                 orderBy: {
                     id: "desc",
                 }
@@ -90,6 +93,9 @@ async function GuessButtons({ rankingId }: { rankingId: string }) {
 
             prisma.rankingItem.findFirst({
                 skip: pair[1],
+                where: {
+                    rankingId
+                },
                 orderBy: {
                     id: "desc",
                 }
