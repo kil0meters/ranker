@@ -7,9 +7,7 @@ export async function EloRanking({ items }: { items: EloRankingItem[] }) {
     return (
         <table className="w-full">
             <thead>
-                <th className="border border-neutral-300 bg-neutral-50 rounded-lg p-2">#</th>
                 <th className="border border-neutral-300 bg-neutral-50">Item</th>
-                <th className="border border-neutral-300 bg-neutral-50 rounded-tr">Elo</th>
             </thead>
 
             {items.map((item, i) =>
