@@ -40,13 +40,16 @@ export default function NewRanking() {
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="description" />
 
                 <Label htmlFor="items">Items</Label>
+                <p className="text-gray-600 text-sm mt-0.5 mb-0" style={{ marginTop: "-1rem" }}>&gt; Each item should be on a new line</p>
                 <Textarea
                     id="items"
-                    className="h-64"
+                    className="h-64 mt-0.5"
                     value={items.join("\n")}
                     onChange={(e) => setItems(e.target.value.replace(/(\n\s*){2,}/g, '\n').split("\n"))}
                     placeholder="items"
+                    style={{ marginTop: "-1rem" }}
                 />
+
 
                 <Button onClick={createPost}>Submit</Button>
             </div>
