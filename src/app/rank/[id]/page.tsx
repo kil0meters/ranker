@@ -2,6 +2,41 @@ import { prisma } from "@/dbconfig";
 import { notFound } from "next/navigation";
 import { GuessButton } from "./guess-button";
 import { EloRanking } from "./elo-ranking";
+import { getServerSession } from "next-auth/next";
+
+async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
+    const session = await getServerSession();
+
+    if (!session || !session.user) {
+        return (
+            <div className="bg-neutral-300">
+                You need to log in
+            </div>
+        );
+
+    } else {
+        const ranking = await prisma.userRankingItemElo.findMany({
+            select: {
+                elo: true,
+                rankingItem: true
+            },
+            where: {
+                userId: session.user.id,
+                rankingItem: {
+                    rankingId
+                }
+            }
+        });
+
+        return (
+            <EloRanking items={
+                ranking.map(item => {
+                    return { elo: item.elo, name: item.rankingItem.text }
+                })
+            } />
+        );
+    }
+}
 
 export default async function Ranking({ params }: { params: { id: string } }) {
     const ranking = await prisma.ranking.findUnique({
@@ -9,6 +44,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
             name: true,
             description: true,
             user: true,
+            RankingItem: true
         },
         where: {
             id: params.id
@@ -16,6 +52,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
     });
 
     if (!ranking) notFound();
+
 
     return (
         <div className='mx-auto container flex flex-col gap-4'>
@@ -42,29 +79,17 @@ export default async function Ranking({ params }: { params: { id: string } }) {
                 <div className="col-start-3 col-end-6">
                     <h2 className="text-lg font-bold">Personal Leaderboard</h2>
 
-                    <EloRanking items={[
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                    ]} />
+                    <LocalLeaderboard rankingId={params.id} />
                 </div>
 
                 <div className="col-start-6 col-end-9">
                     <h2 className="text-lg font-bold">Global Leaderboard</h2>
 
-                    <EloRanking items={[
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                        { elo: 1500, name: "Burger" },
-                    ]} />
+                    <EloRanking items={
+                        ranking.RankingItem.map(item => {
+                            return { elo: item.globalElo, name: item.text }
+                        })
+                    } />
                 </div>
             </div>
         </div>
