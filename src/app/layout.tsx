@@ -28,14 +28,19 @@ export default async function RootLayout({
 						<div>
 							{session
 								? (
-									<div className='inline space-x-5'>
+									<div className='inline space-x-5 flex items-center'>
 										<div className='inline'>Hi, {session.user?.name}</div>
-										<Link href={"/new"} className='font-bold text-lg hover:underline'>
-											New Ranking
-										</Link>
-										<Link href={"/api/auth/signout"} className='font-bold text-lg hover:underline'>
-											Sign out
-										</Link>
+										<img className="inline object-scale-down h-8 w-8" src={session.user?.image} alt='Logo' /> 
+										<button className='px-2 p-1 rounded-lg bg-cyan-500 hover:bg-cyan-600'>
+											<Link href={"/new"} className='font-bold text-lg'>
+												New Ranking
+											</Link>
+										</button>
+										<button className='px-2 p-1 rounded-lg bg-cyan-500 hover:bg-cyan-600'>
+											<Link href={"/api/auth/signout"} className='font-bold text-lg'>
+												Sign out
+											</Link>
+										</button>
 									</div>
 								)
 								: (
