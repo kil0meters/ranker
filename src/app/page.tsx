@@ -26,10 +26,10 @@ export async function ShowEntries() {
                         {entry.user.name}
                     </div>
                     {
-                        entry.description.length > 100 ? 
+                        entry.description.length > 180 ? 
                         (
                             <div className='text text-neutral-700'>
-                                {entry.description.substring(0, 100) + '...'}
+                                {entry.description.substring(0, 180) + '...'}
                             </div>
                         ) :
                         <div className='text text-neutral-700'>
