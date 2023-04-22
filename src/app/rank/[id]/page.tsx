@@ -57,7 +57,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 			})}/>
 
 			<div className="mr-40">
-				<div>
+				<div className='pb-4'>
 					<h1 className='text-2xl font-extrabold'>
 						{global_ranking.name}
 					</h1>
