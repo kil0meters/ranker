@@ -32,7 +32,7 @@ export function GuessButton({ rankingId, options, index }: { rankingId: string, 
 
     return (
         <button
-            className='needToToggle shadow-lg aspect-video p-8 text-3xl font-extrabold rounded-md transition-all bg-neutral-700 text-neutral-50 hover:bg-neutral-600 hover:shadow-xl'
+            className='shadow-lg aspect-video p-8 text-3xl font-extrabold rounded-md transition-all bg-neutral-700 text-neutral-50 hover:bg-neutral-600 hover:shadow-xl'
             onClick={click}>
             {options[index].text}
         </button>
