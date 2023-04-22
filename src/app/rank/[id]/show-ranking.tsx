@@ -18,7 +18,7 @@ function GEloRanking({ items }: {items: RankingItem[]} ) {
 				items.map((val, index) => {
 					return (
 						<span key={index} className={`text-${index < 3 ? highlightColor.first : index < 6 ? highlightColor.second : index < 9 ? highlightColor.third : highlightColor.others}`}>
-							{val.text}
+							{val.text} - {val.globalElo}
 						</span>
 
 					)
@@ -44,7 +44,7 @@ function LEloRanking({ items }: { items: RankingItem[] | null | undefined}) {
 				items.map((val, index) => {
 					return (
 						<span key={index} className={`text-${index < 3 ? highlightColor.first : index < 6 ? highlightColor.second : index < 9 ? highlightColor.third : highlightColor.others}`}>
-							{val.text}
+							{val.text} - {val.globalElo}
 						</span>
 					)
 				})
