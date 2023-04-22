@@ -1,24 +1,34 @@
 import { prisma } from "@/dbconfig";
 import { notFound } from "next/navigation";
 import { GuessButton } from "./guess-button";
-import { EloRanking } from "./elo-ranking";
 import { getServerSession } from "next-auth/next";
 import { RankingItem } from "@prisma/client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import RankingSide from "./show-ranking";
 
-async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
+export default async function Ranking({ params }: { params: { id: string } }) {
+	const global_ranking = await prisma.ranking.findUnique({
+		select: {
+			name: true,
+			user: true,
+			description: true,
+			RankingItem: {
+				orderBy: {
+					globalElo: "desc"
+				}
+			}
+		},
+		where: {
+			id: params.id
+		}
+	});
+	let local_ranking = null;
 	const session = await getServerSession(authOptions);
-
 	if (!session || !session.user) {
-		return (
-			<div className="bg-neutral-300 h-72 rounded flex">
-				<span className="mx-auto my-auto">
-					You need to log in
-				</span>
-			</div>
-		);
-	} else {
-		const ranking = await prisma.userRankingItemElo.findMany({
+		local_ranking = null;
+	}
+	else {
+		 local_ranking = await prisma.userRankingItemElo.findMany({
 			select: {
 				elo: true,
 				rankingItem: true
@@ -26,71 +36,33 @@ async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
 			where: {
 				userId: session.user.id,
 				rankingItem: {
-					rankingId
+					rankingId: params.id
 				}
 			},
 			orderBy: {
 				elo: "desc"
 			}
 		});
-
-		return (
-			<EloRanking items={
-				ranking.map(item => {
-					return { elo: item.elo, name: item.rankingItem.text }
-				})
-			} />
-		);
 	}
-}
 
-export default async function Ranking({ params }: { params: { id: string } }) {
-    const ranking = await prisma.ranking.findUnique({
-        select: {
-            name: true,
-            description: true,
-            user: true,
-            RankingItem: {
-                orderBy: {
-                    globalElo: "desc"
-                }
-            }
-        },
-        where: {
-            id: params.id
-        }
-    });
+	if (!global_ranking) notFound();
 
-    if (!ranking) notFound();
 
-    const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
+	const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
 
 	return (
 		<div className='mx-auto container flex flex-col gap-4'>
-			<aside className="w-auto w-max:10rem bg-blue-500 fixed top-16 right-2 mt-4">
-				<div>
-					<h1 className='text-2xl font-extrabold'>
-						{ranking.name}
-					</h1>
-					<span className='text-neutral-500'>
-						{ranking.user.name}
-					</span>
-				</div>
-				<EloRanking items={
-					ranking.RankingItem.map(item => {
-						return { elo: item.globalElo, name: item.text }
-					})
-				} />
-        
-			</aside>
+			<RankingSide global_rankings={global_ranking.RankingItem} local_rankings={local_ranking?.map((val, index)=>{
+				return val.rankingItem;
+			})}/>
 
 			<div className="mr-40">
 				<div>
 					<h1 className='text-2xl font-extrabold'>
-						{ranking.name}
+						{global_ranking.name}
 					</h1>
 					<span className='text-neutral-500'>
-						{ranking.user.name}
+						{global_ranking.user.name}
 					</span>
 				</div>
 
@@ -99,9 +71,8 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 					<GuessButton rankingId={params.id} options={options} index={1} />
 				</div>
 				<p>
-					{ranking.description}
+					{global_ranking.description}
 				</p>
-				<LocalLeaderboard rankingId={params.id} />
 			</div>
 
 		</div>
