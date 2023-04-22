@@ -24,11 +24,6 @@ export async function POST(res: Request) {
             select: {
                 id: true,
                 globalElo: true,
-                UserRankingItemElo: {
-                    select: {
-                        elo: true,
-                    }
-                }
             },
             where: {
                 id: data.choices[0],
@@ -38,11 +33,6 @@ export async function POST(res: Request) {
             select: {
                 id: true,
                 globalElo: true,
-                UserRankingItemElo: {
-                    select: {
-                        elo: true,
-                    }
-                }
             },
             where: {
                 id: data.choices[1],
@@ -52,14 +42,39 @@ export async function POST(res: Request) {
 
     if (!rankingItems[0] || !rankingItems[1]) return NextResponse.error();
 
-    console.log(`comparing elo: ${rankingItems[0].globalElo}, ${rankingItems[1].globalElo}`);
-    console.log(`comparing elo: ${rankingItems[0].UserRankingItemElo[0].elo}, ${rankingItems[1].UserRankingItemElo[0].elo}`);
+    const userRankingItems = await prisma.$transaction([
+        prisma.userRankingItemElo.upsert({
+            where: {
+                userId_rankingItemId: {
+                    userId: session.user.id,
+                    rankingItemId: rankingItems[0].id
+                },
+            },
+            update: {},
+            create: {
+                userId: session.user.id,
+                rankingItemId: rankingItems[0].id
+            }
+        }),
+        prisma.userRankingItemElo.upsert({
+            where: {
+                userId_rankingItemId: {
+                    userId: session.user.id,
+                    rankingItemId: rankingItems[1].id
+                },
+            },
+            update: {},
+            create: {
+                userId: session.user.id,
+                rankingItemId: rankingItems[1].id,
+            }
+        })
+    ]);
+
+
     // something something update elo
     const newGlobalElos = updateRatings(rankingItems[0].globalElo, rankingItems[1].globalElo, data.index == 0);
-    const newLocalElos = updateRatings(rankingItems[0].UserRankingItemElo[0].elo, rankingItems[1].UserRankingItemElo[0].elo, data.index == 0);
-
-    console.log(`result: ${newGlobalElos}`);
-    console.log(`result: ${newLocalElos}`);
+    const newLocalElos = updateRatings(userRankingItems[0].elo, userRankingItems[1].elo, data.index == 0);
 
     const updated = await prisma.$transaction([
         prisma.rankingItem.update({
