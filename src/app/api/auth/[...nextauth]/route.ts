@@ -8,16 +8,17 @@ export const authOptions: AuthOptions = {
         strategy: "jwt",
     },
     callbacks: {
-        session: async ({ session, token }) => {
+        async session({ session, token }) {
             if (session?.user) {
-                session.user.id = token.uid;
+                session.user.id = token.id;
             }
             return session;
         },
 
-        jwt: async ({ token, user, account, profile, isNewUser }) => {
+        async jwt({ token, user }) {
+            console.log(user);
             if (user) {
-                token.uid = user.id;
+                token.id = user.id;
             }
             return token;
         },

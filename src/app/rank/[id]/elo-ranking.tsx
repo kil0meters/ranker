@@ -13,8 +13,8 @@ export async function EloRanking({ items }: { items: EloRankingItem[] }) {
             </thead>
 
             {items.map((item, i) =>
-                <tr className="group">
-                    <td className="group-last-of-type:rounded-bl border border-neutral-300 p-2">{i}</td>
+                <tr className="group" key={i}>
+                    <td className="group-last-of-type:rounded-bl border border-neutral-300 p-2">{i + 1}</td>
                     <td className="border border-neutral-300 p-2">{item.name}</td>
                     <td className="group-last-of-type:rounded-br border border-neutral-300 p-2">{item.elo}</td>
                 </tr>

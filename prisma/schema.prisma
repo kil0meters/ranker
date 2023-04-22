@@ -75,12 +75,13 @@ model RankingItem {
 model UserRankingItemElo {
     userId        String
     rankingItemId String
-    elo           Int
+    elo           Int    @default(1000)
 
     user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
     rankingItem RankingItem @relation(fields: [rankingItemId], references: [id], onDelete: Cascade)
 
     @@id([userId, rankingItemId])
+    @@unique([userId, rankingItemId])
     @@index([userId])
     @@index([rankingItemId])
 }

@@ -3,14 +3,18 @@ import { notFound } from "next/navigation";
 import { GuessButton } from "./guess-button";
 import { EloRanking } from "./elo-ranking";
 import { getServerSession } from "next-auth/next";
+import { RankingItem } from "@prisma/client";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
         return (
-            <div className="bg-neutral-300">
-                You need to log in
+            <div className="bg-neutral-300 h-72 rounded flex">
+                <span className="mx-auto my-auto">
+                    You need to log in
+                </span>
             </div>
         );
 
@@ -25,6 +29,9 @@ async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
                 rankingItem: {
                     rankingId
                 }
+            },
+            orderBy: {
+                elo: "desc"
             }
         });
 
@@ -44,15 +51,23 @@ export default async function Ranking({ params }: { params: { id: string } }) {
             name: true,
             description: true,
             user: true,
-            RankingItem: true
+            RankingItem: {
+                orderBy: {
+                    globalElo: "desc"
+                }
+            }
         },
         where: {
             id: params.id
         }
     });
 
+    const session = await getServerSession(authOptions);
+    console.log(session);
+
     if (!ranking) notFound();
 
+    const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
 
     return (
         <div className='mx-auto container flex flex-col gap-4'>
@@ -71,8 +86,8 @@ export default async function Ranking({ params }: { params: { id: string } }) {
             </p>
 
             <div className="grid grid-cols-2 w-full gap-8 mb-4">
-                <GuessButton index={0} text={"C++"} />
-                <GuessButton index={1} text={"Rust"} />
+                <GuessButton rankingId={params.id} options={options} index={0} />
+                <GuessButton rankingId={params.id} options={options} index={1} />
             </div>
 
             <div className="grid grid-cols-10 gap-4">
