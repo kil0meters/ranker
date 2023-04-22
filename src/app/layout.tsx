@@ -67,6 +67,8 @@ export default async function RootLayout({
 						<div className="grid grid-cols-1 text-cyan-900">
 							<a href="https://github.com/WERDXZ">WERDXZ</a>
 							<a href="https://github.com/kil0meters">kil0meters</a>
+							<a href="https://github.com/mcsharland">mcsharland</a>
+							<a href="https://github.com/lostdanielfound">lostdanielfound</a>
 						</div>
 					</div>
 					<div>
