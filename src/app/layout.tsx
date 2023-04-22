@@ -3,6 +3,8 @@ import { useSession } from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import './globals.css'
 import { authOptions } from './api/auth/[...nextauth]/route';
+import Image from "next/image";
+import rankerLogo from "../../public/Ranker.svg";
 
 export const metadata = {
     title: 'Ranker',
@@ -21,7 +23,14 @@ export default async function RootLayout({
             <body className='min-h-screen flex flex-col'>
                 <nav className='border-b border-neutral-300 p-4 w-full mb-4 fixed backdrop-blur bg-white/50 shadow-white'>
                     <div className='container mx-auto flex justify-between items-center'>
-                        <Link href={"/"} className='font-bold text-lg hover:underline'>
+                        <Link href={"/"} className='font-bold text-lg hover:underline flex items-center gap-2'>
+                            <Image
+                                priority
+                                src={rankerLogo}
+                                height={36}
+                                alt="Follow us on Twitter"
+                            />
+
                             Ranker
                         </Link>
 
