@@ -62,9 +62,6 @@ export default async function Ranking({ params }: { params: { id: string } }) {
         }
     });
 
-    const session = await getServerSession(authOptions);
-    console.log(session);
-
     if (!ranking) notFound();
 
     const options: RankingItem[] = await prisma.$queryRaw`SELECT * FROM RankingItem WHERE rankingId = ${params.id} ORDER BY RAND() LIMIT 2`;
