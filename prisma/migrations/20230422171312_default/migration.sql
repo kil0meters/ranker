@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `UserRankingItemElo` MODIFY `elo` INTEGER NOT NULL DEFAULT 1000;

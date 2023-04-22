@@ -44,7 +44,7 @@ export default function NewRanking() {
                     id="items"
                     className="h-64"
                     value={items.join("\n")}
-                    onChange={(e) => setItems(e.target.value.replace(/(\n\s*){2,}/g, '\n').split("\n"))}
+                    onChange={(e) => setItems(e.target.value.trim().replace(/(\n\s*){2,}/g, '\n').split("\n"))}
                     placeholder="items"
                 />
 
