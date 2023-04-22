@@ -32,14 +32,15 @@ model Account {
 }
 
 model User {
-    id                 String               @id @default(cuid())
-    name               String?
-    email              String?              @unique
-    emailVerified      DateTime?
-    image              String?
-    accounts           Account[]
-    Ranking            Ranking[]
-    UserRankingItemElo UserRankingItemElo[]
+    id                         String                       @id @default(cuid())
+    name                       String?
+    email                      String?                      @unique
+    emailVerified              DateTime?
+    image                      String?
+    accounts                   Account[]
+    Ranking                    Ranking[]
+    UserRankingItemElo         UserRankingItemElo[]
+    UserRankingItemChoiceIndex UserRankingItemChoiceIndex[]
 }
 
 model Ranking {
@@ -54,7 +55,8 @@ model Ranking {
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    RankingItem RankingItem[]
+    RankingItem                RankingItem[]
+    UserRankingItemChoiceIndex UserRankingItemChoiceIndex[]
 
     @@index([userId])
 }
@@ -84,4 +86,17 @@ model UserRankingItemElo {
     @@unique([userId, rankingItemId])
     @@index([userId])
     @@index([rankingItemId])
+}
+
+model UserRankingItemChoiceIndex {
+    userId    String
+    rankingId String
+    index     Int    @default(0)
+
+    user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    ranking Ranking @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+
+    @@id([userId, rankingId])
+    @@index([userId])
+    @@index([rankingId])
 }

@@ -10,8 +10,8 @@ function* uniqueCombinations(N: number): Generator<[number, number]> {
         }
     }
 }
-  
-//Helper function: Randomizes pairs 
+
+//Helper function: Randomizes pairs
 function generateSeededRandomPairs(N: number, seed: number): number[][] {
     const random = new Random(seed);
     const indexes = Array.from({ length: N }, (_, i) => i);
@@ -21,8 +21,8 @@ function generateSeededRandomPairs(N: number, seed: number): number[][] {
     random.shuffle(shuffledPairs); // Shuffle the list of index pairs
     return shuffledPairs;
 }
-  
-function getPairByIndex(N: number, index: number): number[] {
+
+export function getPairByIndex(N: number, index: number): number[] {
     const seed = 42; //Arbitrary seed
     const totalPairs = N * (N - 1) / 2; //Equivilant of C(n,2)
     if (index < 0 || index >= totalPairs) {
@@ -31,18 +31,18 @@ function getPairByIndex(N: number, index: number): number[] {
     const pairs = generateSeededRandomPairs(N, seed);
     return pairs[index];
 }
-  
+
 class Random {
     private seed: number;
     constructor(seed: number) {
         this.seed = seed;
     }
-  
+
     nextFloat(): number {
         const x = Math.sin(this.seed++) * 10000;
         return x - Math.floor(x);
     }
-  
+
     shuffle(array: any[]): void {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(this.nextFloat() * (i + 1));
@@ -58,5 +58,5 @@ class Random {
 
     Returns pair of indexes for next two items to display
 */
-  
-  
+
+
