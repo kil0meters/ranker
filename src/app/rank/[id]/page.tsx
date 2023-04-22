@@ -83,6 +83,9 @@ async function GuessButtons({ rankingId }: { rankingId: string }) {
         let options = await prisma.$transaction([
             prisma.rankingItem.findFirst({
                 skip: pair[0],
+                where: {
+                    rankingId
+                },
                 orderBy: {
                     id: "desc",
                 }
@@ -90,6 +93,9 @@ async function GuessButtons({ rankingId }: { rankingId: string }) {
 
             prisma.rankingItem.findFirst({
                 skip: pair[1],
+                where: {
+                    rankingId
+                },
                 orderBy: {
                     id: "desc",
                 }
@@ -150,10 +156,14 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 
             <div className="grid grid-cols-10 w-full gap-4">
                 <div className="col-start-3 col-end-6">
+                    <h2 className="font-bold text-lg">Local Leaderboard</h2>
+
                     <LocalLeaderboard rankingId={params.id} />
                 </div>
 
                 <div className="col-start-6 col-end-9">
+                    <h2 className="font-bold text-lg">Global Leaderboard</h2>
+
                     <EloRanking items={
                         ranking.RankingItem.map(item => {
                             return { elo: item.globalElo, name: item.text }
