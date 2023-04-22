@@ -44,7 +44,7 @@ export default function NewRanking() {
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="description" />
 
                 <Label htmlFor="items">Items</Label>
-                <p className="text-gray-600 text-sm mt-0.5 mb-0" style={{ marginTop: "-1rem" }}>&gt; Each item should be on a new line</p>
+                <p className="text-gray-600 text-sm mt-0.5 mb-0" style={{ marginTop: "-1rem" }}>&gt; Each item should be on a new line or comma</p>
                 <Textarea
                     id="items"
                     className="h-64 mt-0.5"
