@@ -17,7 +17,7 @@ export async function ShowEntries() {
 
     return (
         <div className='grid grid-cols-1 grid-flow-row border-neutral-300 rounded border'>
-            {entries.map((entry, index) => (
+            {entries.map((entry: any, index: number) => (
                 <Link className='border-b last:border-b-0 border-neutral-300 p-4 w-full hover:bg-neutral-100 transition-all' key={index} href={"/rank/" + entry.id}>
                     <span className='font-bold text-lg'>
                         {entry.name}
