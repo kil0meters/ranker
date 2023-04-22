@@ -30,7 +30,7 @@ export default async function RootLayout({
 								? (
 									<div className='inline space-x-5 flex items-center'>
 										<div className='inline'>Hi, {session.user?.name}</div>
-										<img className="inline object-scale-down h-8 w-8" src={session.user?.image} alt='Logo' /> 
+										<img className="inline object-scale-down h-8 w-8 rounded-full" src={session.user?.image} alt='Logo' /> 
 										<button className='px-2 p-1 rounded-lg bg-cyan-300 hover:bg-cyan-400'>
 											<Link href={"/new"} className='font-bold text-lg'>
 												New Ranking
