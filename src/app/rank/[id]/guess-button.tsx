@@ -22,7 +22,7 @@ export function GuessButton({ rankingId, options, index }: { rankingId: string, 
 
     return (
         <button
-            className='shadow-lg aspect-video p-8 text-3xl font-extrabold rounded-md transition-all bg-neutral-700 text-neutral-50 hover:bg-neutral-600 hover:shadow-xl'
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
             onClick={click}>
             {options[index].text}
         </button>
