@@ -1,29 +1,35 @@
 import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
 
 const schema = z.object({
-    title: z.string(),
+    name: z.string(),
     description: z.string().optional(),
-    items: z.array(z.object({
-        text: z.string(),
-    })).min(3)
+    items: z.array(z.string()).min(3)
 });
 
-export async function POST(request: Request) {
-    const data = schema.parse(await request.json());
+export async function POST(res: Request) {
+    const data = schema.parse(await res.json());
 
-    return await prisma.ranking.create({
+    const rankingItems: { text: string }[] = [];
+    for (let i = 0; i < data.items.length; i++) {
+        rankingItems.push({ text: data.items[i] });
+    }
+
+    const ranking = await prisma.ranking.create({
         data: {
-            name: data.title,
+            name: data.name,
             description: data.description,
 
             RankingItem: {
                 createMany: {
-                    data: data.items
+                    data: rankingItems,
                 }
             }
         },
     });
+
+    return NextResponse.json(ranking);
 }

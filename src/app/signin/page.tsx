@@ -1,7 +1,3 @@
-import { GuessButton } from '@/components/guess-button';
-import { config } from '@/dbconfig'
-import { connect } from '@planetscale/database'
-import Link from 'next/link';
 import { SigninButton } from './signin-button';
 
 export default function SigninPage() {
