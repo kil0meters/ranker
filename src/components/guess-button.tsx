@@ -22,7 +22,6 @@ export function GuessButton({ index, text }: { index: number, text: string }) {
             onClick={click}>
             {text}
         </button>
-
     );
 }
 

@@ -1,14 +1,23 @@
 import { GuessButton } from '@/components/guess-button';
 import { config } from '@/dbconfig'
 import { connect } from '@planetscale/database'
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 async function ShowNumber() {
-    const conn = connect(config);
-    const results = await conn.execute('select 1 as col from dual where 1=?', [1])
+    const v = await prisma.ranking.create({
+        data: {
+            name: "This is a test ranking",
+        }
+    });
+
+    const values = prisma.ranking.findMany();
 
     return (
         <div>
-            {JSON.stringify(results.rows[0])}
+            {JSON.stringify(v)}
+            {JSON.stringify(values)}
         </div>
     );
 }

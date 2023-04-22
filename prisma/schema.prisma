@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider          = "mysql"
+    url               = env("DATABASE_URL")
+    shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+    relationMode      = "prisma"
+}
+
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+    @@index([userId])
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+}
+
+model Ranking {
+    id          String  @id @unique @default(cuid())
+    name        String  @db.VarChar(200)
+    description String? @db.Text
+    popularity  Int     @default(1)
+
+    createdAt           DateTime              @default(now())
+    updatedAt           DateTime              @updatedAt
+    RankingItemInstance RankingItemInstance[]
+}
+
+model RankingItem {
+    id                  String                @unique @default(cuid())
+    text                String                @db.Text
+    imageUrl            String?
+    globalElo           Int
+    RankingItemInstance RankingItemInstance[]
+}
+
+model RankingItemInstance {
+    id            String @unique @default(cuid())
+    rankingId     String
+    rankingItemId String
+    elo           Int
+
+    ranking     Ranking     @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+    rankingItem RankingItem @relation(fields: [rankingItemId], references: [id], onDelete: Cascade)
+
+    @@index([rankingId])
+    @@index([rankingItemId])
+}
