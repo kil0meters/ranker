@@ -16,6 +16,10 @@ export default function NewRanking() {
     const [items, setItems] = useState<string[]>([]);
 
     const createPost = async () => {
+        if (items.length > 0 && items[items.length - 1] === "") {
+            items.pop();
+        }
+
         const data: Ranking = await (await fetch("/api/createranking", {
             method: "POST",
             body: JSON.stringify({

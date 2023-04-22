@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { authOptions } from '../auth/[...nextauth]/route';
 
 const schema = z.object({
-    name: z.string(),
+    name: z.string().nonempty(),
     description: z.string().optional(),
     items: z.array(z.string()).min(3)
 });
