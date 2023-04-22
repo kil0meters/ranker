@@ -8,7 +8,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
 
-    const session = await getServerSession();
+	const session = await getServerSession();
 
 
 	if (!session || !session.user) {
@@ -17,58 +17,59 @@ async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
 				You need to log in
 			</div>
 		);
-	const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-        return (
-            <div className="bg-neutral-300">
-                You need to log in
-            </div>
-        );
+		const session = await getServerSession(authOptions);
+		if (!session || !session.user) {
+			return (
+				<div className="bg-neutral-300">
+					You need to log in
+				</div>
+			);
 
-    } else {
-        const ranking = await prisma.userRankingItemElo.findMany({
-            select: {
-                elo: true,
-                rankingItem: true
-            },
-            where: {
-                userId: session.user.id,
-                rankingItem: {
-                    rankingId
-                }
-            },
-            orderBy: {
-                elo: "desc"
-            }
-        });
+		} else {
+			const ranking = await prisma.userRankingItemElo.findMany({
+				select: {
+					elo: true,
+					rankingItem: true
+				},
+				where: {
+					userId: session.user.id,
+					rankingItem: {
+						rankingId
+					}
+				},
+				orderBy: {
+					elo: "desc"
+				}
+			});
 
-        return (
-            <EloRanking items={
-                ranking.map(item => {
-                    return { elo: item.elo, name: item.rankingItem.text }
-                })
-            } />
-        );
-    }
+			return (
+				<EloRanking items={
+					ranking.map(item => {
+						return { elo: item.elo, name: item.rankingItem.text }
+					})
+				} />
+			);
+		}
+	}
 }
 
 export default async function Ranking({ params }: { params: { id: string } }) {
 
-    const ranking = await prisma.ranking.findUnique({
-        select: {
-            name: true,
-            description: true,
-            user: true,
-            RankingItem: {
-                orderBy: {
-                    globalElo: "desc"
-                }
-            }
-        },
-        where: {
-            id: params.id
-        }
-    });
+	const ranking = await prisma.ranking.findUnique({
+		select: {
+			name: true,
+			description: true,
+			user: true,
+			RankingItem: {
+				orderBy: {
+					globalElo: "desc"
+				}
+			}
+		},
+		where: {
+			id: params.id
+		}
+	});
 
 	const session = await getServerSession(authOptions);
 	console.log(session);
@@ -111,5 +112,4 @@ export default async function Ranking({ params }: { params: { id: string } }) {
 			</div>
 		</div>
 	);
-	}
 }

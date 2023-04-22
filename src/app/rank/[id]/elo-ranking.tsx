@@ -9,8 +9,6 @@ export async function EloRanking({ items }: { items: EloRankingItem[] }) {
             <thead>
                 <th className="border border-neutral-300 bg-neutral-50">Item</th>
             </thead>
-
-
       </table>
     );
 }
