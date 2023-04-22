@@ -15,6 +15,8 @@ export async function POST(res: Request) {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.error();
 
+    const now = performance.now();
+
     const data = schema.parse(await res.json());
 
     const rankingItems = await Promise.all([
@@ -115,6 +117,9 @@ export async function POST(res: Request) {
             }),
         ]);
     });
+
+    const end = performance.now();
+    console.log(`time: ${end - now}`);
 
     return NextResponse.json(updated);
 }
