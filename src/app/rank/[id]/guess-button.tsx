@@ -7,9 +7,6 @@ export function GuessButton({ rankingId, options, index }: { rankingId: string, 
     const router = useRouter();
     const choices = options.map(x => x.id);
 
-    console.log(options);
-    console.log(index);
-
     const click = async () => {
         await fetch("/api/vote", {
             method: "POST",

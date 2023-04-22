@@ -60,7 +60,7 @@ model Ranking {
 }
 
 model RankingItem {
-    id        String  @unique @default(cuid())
+    id        String  @id @unique @default(cuid())
     rankingId String
     text      String  @db.Text
     imageUrl  String?

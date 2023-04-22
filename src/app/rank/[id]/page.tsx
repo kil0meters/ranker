@@ -7,23 +7,8 @@ import { RankingItem } from "@prisma/client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
-<<<<<<< HEAD
-||||||| parent of a5aaa93 (HAHAHAHAHAHAHAHAHAH)
-    const session = await getServerSession();
-=======
     const session = await getServerSession(authOptions);
->>>>>>> a5aaa93 (HAHAHAHAHAHAHAHAHAH)
 
-<<<<<<< HEAD
-	const session = await getServerSession();
-||||||| parent of a5aaa93 (HAHAHAHAHAHAHAHAHAH)
-    if (!session || !session.user) {
-        return (
-            <div className="bg-neutral-300">
-                You need to log in
-            </div>
-        );
-=======
     if (!session || !session.user) {
         return (
             <div className="bg-neutral-300 h-72 rounded flex">
@@ -32,24 +17,7 @@ async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
                 </span>
             </div>
         );
->>>>>>> a5aaa93 (HAHAHAHAHAHAHAHAHAH)
 
-<<<<<<< HEAD
-||||||| parent of a5aaa93 (HAHAHAHAHAHAHAHAHAH)
-    } else {
-        const ranking = await prisma.userRankingItemElo.findMany({
-            select: {
-                elo: true,
-                rankingItem: true
-            },
-            where: {
-                userId: session.user.id,
-                rankingItem: {
-                    rankingId
-                }
-            }
-        });
-=======
     } else {
         const ranking = await prisma.userRankingItemElo.findMany({
             select: {
@@ -66,47 +34,15 @@ async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
                 elo: "desc"
             }
         });
->>>>>>> a5aaa93 (HAHAHAHAHAHAHAHAHAH)
 
-	if (!session || !session.user) {
+
 		return (
-			<div className="bg-neutral-300">
-				You need to log in
-			</div>
+			<EloRanking items={
+				ranking.map(item => {
+					return { elo: item.elo, name: item.rankingItem.text }
+				})
+			} />
 		);
-		const session = await getServerSession(authOptions);
-		if (!session || !session.user) {
-			return (
-				<div className="bg-neutral-300">
-					You need to log in
-				</div>
-			);
-
-		} else {
-			const ranking = await prisma.userRankingItemElo.findMany({
-				select: {
-					elo: true,
-					rankingItem: true
-				},
-				where: {
-					userId: session.user.id,
-					rankingItem: {
-						rankingId
-					}
-				},
-				orderBy: {
-					elo: "desc"
-				}
-			});
-
-			return (
-				<EloRanking items={
-					ranking.map(item => {
-						return { elo: item.elo, name: item.rankingItem.text }
-					})
-				} />
-			);
-		}
 	}
 }
 
