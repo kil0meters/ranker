@@ -2,7 +2,15 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+Ensure that you have Node.js 14.18.0 or newer installed on your OS. 
+
+Once in the directory of this project, type in the following command to sync over the packages 
+needed to run the development server: 
+```bash
+npm install 
+```
+
+Next, run the development server:
 
 ```bash
 npm run dev
