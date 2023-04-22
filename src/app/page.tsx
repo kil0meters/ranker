@@ -25,10 +25,17 @@ export async function ShowEntries() {
                     <div className='text-sm text-neutral-500 mb-2'>
                         {entry.user.name}
                     </div>
-
-                    <div className='text text-neutral-700'>
-                        {entry.description}
-                    </div>
+                    {
+                        entry.description.length > 100 ? 
+                        (
+                            <div className='text text-neutral-700'>
+                                {entry.description.substring(0, 100) + '...'}
+                            </div>
+                        ) :
+                        <div className='text text-neutral-700'>
+                            {entry.description}
+                        </div>
+                    }
                 </Link>
             ))}
         </div>
