@@ -11,7 +11,7 @@ function* uniqueCombinations(N: number): Generator<[number, number]> {
     }
 }
   
-//Randomizes pairs 
+//Helper function: Randomizes pairs 
 function generateSeededRandomPairs(N: number, seed: number): number[][] {
     const random = new Random(seed);
     const indexes = Array.from({ length: N }, (_, i) => i);
@@ -50,5 +50,13 @@ class Random {
         }
     }
 }
+
+/*
+    Use getPairByIndex
+   > pass in N - size of list
+   > index - total number of pairs player has already gone through. Value must be between 0 and C(N,2)
+
+    Returns pair of indexes for next two items to display
+*/
   
   
