@@ -22,8 +22,6 @@ async function ShowNumber() {
     );
 }
 
-const entryPerPage=10;
-
 export default function Home() {
 
     return (
