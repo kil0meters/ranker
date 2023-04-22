@@ -32,13 +32,14 @@ model Account {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    Ranking       Ranking[]
+    id                 String               @id @default(cuid())
+    name               String?
+    email              String?              @unique
+    emailVerified      DateTime?
+    image              String?
+    accounts           Account[]
+    Ranking            Ranking[]
+    UserRankingItemElo UserRankingItemElo[]
 }
 
 model Ranking {
@@ -63,9 +64,23 @@ model RankingItem {
     rankingId String
     text      String  @db.Text
     imageUrl  String?
-    elo       Int     @default(1000)
+    globalElo Int     @default(1000)
 
-    ranking Ranking @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+    ranking            Ranking              @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+    UserRankingItemElo UserRankingItemElo[]
 
     @@index([rankingId])
+}
+
+model UserRankingItemElo {
+    userId        String
+    rankingItemId String
+    elo           Int
+
+    user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    rankingItem RankingItem @relation(fields: [rankingItemId], references: [id], onDelete: Cascade)
+
+    @@id([userId, rankingItemId])
+    @@index([userId])
+    @@index([rankingItemId])
 }

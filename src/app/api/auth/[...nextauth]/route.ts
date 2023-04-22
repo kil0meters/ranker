@@ -7,6 +7,21 @@ export const authOptions: AuthOptions = {
     session: {
         strategy: "jwt",
     },
+    callbacks: {
+        session: async ({ session, token }) => {
+            if (session?.user) {
+                session.user.id = token.uid;
+            }
+            return session;
+        },
+
+        jwt: async ({ token, user, account, profile, isNewUser }) => {
+            if (user) {
+                token.uid = user.id;
+            }
+            return token;
+        },
+    },
     adapter: PrismaAdapter(prisma),
     providers: [
         GithubProvider({
