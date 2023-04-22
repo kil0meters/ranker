@@ -1,7 +1,7 @@
 import { prisma } from "@/dbconfig";
 import Link from "next/link";
 
-export async function ShowEntries() {
+async function ShowEntries() {
     const entries = await prisma.ranking.findMany({
         select: {
             id: true,
@@ -26,15 +26,15 @@ export async function ShowEntries() {
                         {entry.user.name}
                     </div>
                     {
-                        entry.description.length > 180 ? 
-                        (
+                        entry.description.length > 180 ?
+                            (
+                                <div className='text text-neutral-700'>
+                                    {entry.description.substring(0, 180) + '...'}
+                                </div>
+                            ) :
                             <div className='text text-neutral-700'>
-                                {entry.description.substring(0, 180) + '...'}
+                                {entry.description}
                             </div>
-                        ) :
-                        <div className='text text-neutral-700'>
-                            {entry.description}
-                        </div>
                     }
                 </Link>
             ))}

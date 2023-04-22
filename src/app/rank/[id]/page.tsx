@@ -104,7 +104,7 @@ async function GuessButtons({ rankingId }: { rankingId: string }) {
     } catch (e) {
         return (
             <div className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 max-w-lg rounded-lg mx-auto p-8 shadow-md">
-                <span className="text-6xl font-bolder">You've rated everything.</span>
+                <span className="text-6xl font-bolder">You rated everything. 😊</span>
             </div>
         );
     }
