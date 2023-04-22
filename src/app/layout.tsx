@@ -19,7 +19,7 @@ export default async function RootLayout({
 	return (
 		<html lang="en">
 			<body>
-				<div className='border-b border-neutral-300 p-4 w-full mb-4'>
+				<nav className='border-b border-neutral-300 p-4 w-full mb-4 fixed backdrop-blur shadow-white'>
 					<div className='container mx-auto flex justify-between items-center'>
 						<Link href={"/"} className='font-bold text-lg hover:underline'>
 								Ranker
@@ -43,8 +43,10 @@ export default async function RootLayout({
 							}
 						</div>
 					</div>
+				</nav>
+				{/*place holder*/}
+				<div style={{paddingTop:"5rem"}}>
 				</div>
-
 				{children}
 			</body>
 		</html>
