@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `RankingItem` MODIFY `globalElo` INTEGER NOT NULL DEFAULT 1000;

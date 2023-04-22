@@ -46,28 +46,20 @@ model Ranking {
     description String? @db.Text
     popularity  Int     @default(1)
 
-    createdAt           DateTime              @default(now())
-    updatedAt           DateTime              @updatedAt
-    RankingItemInstance RankingItemInstance[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    RankingItem RankingItem[]
 }
 
 model RankingItem {
-    id                  String                @unique @default(cuid())
-    text                String                @db.Text
-    imageUrl            String?
-    globalElo           Int
-    RankingItemInstance RankingItemInstance[]
-}
+    id        String  @unique @default(cuid())
+    rankingId String
+    text      String  @db.Text
+    imageUrl  String?
+    elo       Int     @default(1000)
 
-model RankingItemInstance {
-    id            String @unique @default(cuid())
-    rankingId     String
-    rankingItemId String
-    elo           Int
-
-    ranking     Ranking     @relation(fields: [rankingId], references: [id], onDelete: Cascade)
-    rankingItem RankingItem @relation(fields: [rankingItemId], references: [id], onDelete: Cascade)
+    ranking Ranking @relation(fields: [rankingId], references: [id], onDelete: Cascade)
 
     @@index([rankingId])
-    @@index([rankingItemId])
 }
