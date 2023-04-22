@@ -13,13 +13,12 @@ async function ShowNumber() {
     );
 }
 
+const entryPerPage=10;
+
 export default function Home() {
+
     return (
         <main className="container mx-auto">
-            <div className='grid grid-cols-2 gap-4'>
-                <GuessButton index={0} text={"C++"} />
-                <GuessButton index={1} text={"Rust"} />
-            </div>
             <ShowNumber />
         </main>
     );

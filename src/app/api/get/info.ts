@@ -1,5 +1,10 @@
 
-export default function get(): {title:string,desc:string,numberItem:number,date:string,url:string} {
+export default function get(session:string): 
+{title:string,
+	desc:string,
+	numberItem:number,
+	date:string,
+	url:string} {
 
 	return{
 		title: "what ever the title is",
