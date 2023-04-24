@@ -16,7 +16,7 @@ export default function NewRanking() {
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [items, setItems] = useState<string[]>([]);
+    const [items, setItems] = useState<string[]>([""]);
 
     const [loading, setLoading] = useState(false);
 
@@ -48,6 +48,11 @@ export default function NewRanking() {
     };
 
     const removeItem = (index: number) => {
+        if (items.length <= 1) {
+            updateItem("", index);
+            return;
+        }
+    
         const newItems = items.filter((_, i) => i !== index);
         setItems(newItems);
     };
