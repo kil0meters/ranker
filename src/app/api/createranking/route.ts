@@ -1,8 +1,9 @@
-import { prisma } from '@/dbconfig';
+import { db } from '@/dbconfig';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { nanoid } from 'nanoid';
 
 const schema = z.object({
     name: z.string().nonempty(),
@@ -16,23 +17,29 @@ export async function POST(res: Request) {
 
     const data = schema.parse(await res.json());
 
-    const rankingItems: { text: string }[] = [];
-    for (let i = 0; i < data.items.length; i++) {
-        rankingItems.push({ text: data.items[i] });
-    }
+    const ranking = await db.transaction().execute(async (tx) => {
+        const res = await tx
+            .insertInto("Ranking")
+            .values({
+                name: data.name,
+                publicId: nanoid(10),
+                description: data.description,
+                updatedAt: new Date(),
+                userId: session.user.id
+            }).executeTakeFirstOrThrow();
 
-    const ranking = await prisma.ranking.create({
-        data: {
-            name: data.name,
-            description: data.description,
-            userId: session.user.id,
+        const id = Number(res.insertId);
 
-            RankingItem: {
-                createMany: {
-                    data: rankingItems,
-                }
-            }
-        },
+        const rankingItems: { text: string, publicId: string, rankingId: number }[] = [];
+        for (let i = 0; i < data.items.length; i++) {
+            rankingItems.push({ text: data.items[i], publicId: nanoid(12), rankingId: id });
+        }
+
+        await tx.insertInto("RankingItem").values(rankingItems).execute();
+
+        const { publicId } = await tx.selectFrom("Ranking").select("publicId").where("id", "=", id).executeTakeFirstOrThrow();
+
+        return { id: publicId };
     });
 
     return NextResponse.json(ranking);

@@ -1,4 +1,4 @@
-import { prisma } from '@/dbconfig'
+import { db } from '@/dbconfig'
 import { z } from 'zod';
 import { getServerSession } from 'next-auth/next';
 import { NextResponse } from 'next/server';
@@ -19,119 +19,100 @@ export async function POST(res: Request) {
 
     const data = schema.parse(await res.json());
 
-    const rankingItems = await prisma.$transaction([
-        prisma.rankingItem.findUnique({
-            select: {
-                id: true,
-                globalElo: true,
-            },
-            where: {
-                id: data.choices[0],
-            }
-        }),
-        prisma.rankingItem.findUnique({
-            select: {
-                id: true,
-                globalElo: true,
-            },
-            where: {
-                id: data.choices[1],
-            }
-        }),
-    ]);
+    let items = await db
+        .selectFrom("RankingItem")
+        .leftJoin("Ranking", "RankingItem.rankingId", "Ranking.id")
+        .select("RankingItem.text as name")
+        .select("RankingItem.globalElo as elo")
+        .select("RankingItem.id as id")
+        .select("RankingItem.publicId as publicId")
+        .where("Ranking.publicId", "=", data.rankingId)
+        .execute();
+
+    const rankingItems = [
+        items.find((x) => x.publicId == data.choices[0])!,
+        items.find((x) => x.publicId == data.choices[1])!,
+    ];
 
     if (!rankingItems[0] || !rankingItems[1]) return NextResponse.error();
 
-    const userRankingItems = await prisma.$transaction([
-        prisma.userRankingItemElo.upsert({
-            where: {
-                userId_rankingItemId: {
-                    userId: session.user.id,
-                    rankingItemId: rankingItems[0].id
-                },
-            },
-            update: {},
-            create: {
+    await db
+        .insertInto("UserRankingItemElo")
+        .ignore()
+        .values([
+            {
                 userId: session.user.id,
-                rankingItemId: rankingItems[0].id
-            }
-        }),
-        prisma.userRankingItemElo.upsert({
-            where: {
-                userId_rankingItemId: {
-                    userId: session.user.id,
-                    rankingItemId: rankingItems[1].id
-                },
+                rankingItemId: rankingItems[0].id,
             },
-            update: {},
-            create: {
+            {
                 userId: session.user.id,
                 rankingItemId: rankingItems[1].id,
-            }
-        })
-    ]);
+            },
+        ])
+        .execute();
 
+    const userRankingItems = await db
+        .selectFrom("UserRankingItemElo")
+        .select("elo")
+        .select("rankingItemId")
+        .where((eb) => eb.or([
+            eb.cmpr("rankingItemId", "=", rankingItems[0].id),
+            eb.cmpr("rankingItemId", "=", rankingItems[1].id),
+        ]))
+        .execute();
+
+    // sometimes the db will give us the items in the wrong order
+    if (userRankingItems[0].rankingItemId != rankingItems[0].id) {
+        let tmp = userRankingItems[0];
+        userRankingItems[0] = userRankingItems[1];
+        userRankingItems[1] = tmp;
+    }
 
     // something something update elo
-    const newGlobalElos = updateRatings(rankingItems[0].globalElo, rankingItems[1].globalElo, data.index == 0);
+    const newGlobalElos = updateRatings(rankingItems[0].elo, rankingItems[1].elo, data.index == 0);
     const newLocalElos = updateRatings(userRankingItems[0].elo, userRankingItems[1].elo, data.index == 0);
 
-    const updated = await prisma.$transaction([
-        prisma.rankingItem.update({
-            data: {
-                globalElo: newGlobalElos[0]
-            },
-            where: {
-                id: data.choices[0]
-            }
-        }),
+    await Promise.all([
+        db
+            .updateTable("RankingItem")
+            .set({ globalElo: newGlobalElos[0] })
+            .where("publicId", "=", data.choices[0])
+            .executeTakeFirstOrThrow(),
 
-        prisma.userRankingItemElo.update({
-            data: {
-                elo: newLocalElos[0]
-            },
-            where: {
-                userId_rankingItemId: {
-                    rankingItemId: data.choices[0],
-                    userId: session.user.id,
-                }
-            }
-        }),
+        db
+            .updateTable("RankingItem")
+            .set({ globalElo: newGlobalElos[1] })
+            .where("publicId", "=", data.choices[1])
+            .executeTakeFirstOrThrow(),
 
-        prisma.rankingItem.update({
-            data: {
-                globalElo: newGlobalElos[1]
-            },
-            where: {
-                id: data.choices[1]
-            }
-        }),
+        db
+            .updateTable("UserRankingItemElo")
+            .set({ elo: newLocalElos[0] })
+            .where("userId", "=", session.user.id)
+            .where((eb) => eb.cmpr("rankingItemId", "=", eb
+                .selectFrom("RankingItem")
+                .select("id")
+                .where("publicId", "=", data.choices[0])))
+            .executeTakeFirstOrThrow(),
 
-        prisma.userRankingItemElo.update({
-            data: {
-                elo: newLocalElos[1]
-            },
-            where: {
-                userId_rankingItemId: {
-                    rankingItemId: data.choices[1],
-                    userId: session.user.id,
-                }
-            }
-        }),
+        db
+            .updateTable("UserRankingItemElo")
+            .set({ elo: newLocalElos[1] })
+            .where("userId", "=", session.user.id)
+            .where((eb) => eb.cmpr("rankingItemId", "=", eb
+                .selectFrom("RankingItem")
+                .select("id")
+                .where("publicId", "=", data.choices[1])))
+            .executeTakeFirstOrThrow(),
+
+        db
+            .updateTable("UserRankingItemChoiceIndex")
+            .set(eb => ({ index: eb.bxp("index", "+", 1) }))
+            .execute()
     ]);
-
-    await prisma.userRankingItemChoiceIndex.update({
-        where: {
-            userId_rankingId: {
-                userId: session.user.id,
-                rankingId: data.rankingId,
-            }
-        },
-        data: { index: { increment: 1 } },
-    });
 
     const end = performance.now();
     console.log(`time: ${end - now}`);
 
-    return NextResponse.json(updated);
+    return NextResponse.json({ success: true });
 }

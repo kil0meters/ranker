@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `RankingItem` ADD COLUMN `globalElo` INTEGER NOT NULL DEFAULT 1000;

@@ -1,13 +1,16 @@
-import { prisma } from "@/dbconfig";
+import { db } from "@/dbconfig";
 import { notFound } from "next/navigation";
 import { EloRanking } from "./elo-ranking";
 import { getServerSession } from "next-auth/next";
-import { RankingItem } from "@prisma/client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getPairByIndex } from "@/order";
 import { GuessButtonContainer } from "./guess-button";
+import { Suspense, cache } from "react";
+import { LoadingGuessButtons } from "./loading-guess-buttons";
+import { Metadata } from "next";
+import { getRankingItems } from "@/util";
 
-async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
+async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
@@ -19,93 +22,61 @@ async function LocalLeaderboard({ rankingId }: { rankingId: string }) {
             </div>
         );
     } else {
-        const ranking = await prisma.userRankingItemElo.findMany({
-            select: {
-                elo: true,
-                rankingItem: true
-            },
-            where: {
-                userId: session.user.id,
-                rankingItem: {
-                    rankingId
-                }
-            },
-            orderBy: {
-                elo: "desc"
-            }
-        });
+        const ranking = await db
+            .selectFrom("RankingItem")
+            .innerJoin("UserRankingItemElo", "UserRankingItemElo.rankingItemId", "RankingItem.id")
+            .select("text as name")
+            .select("UserRankingItemElo.elo as elo")
+            .where("rankingId", "=", rankingId)
+            .where("UserRankingItemElo.userId", "=", session.user.id)
+            .orderBy("elo", "desc")
+            .execute();
 
         return (
-            <EloRanking items={
-                ranking.map(item => {
-                    return { elo: item.elo, name: item.rankingItem.text }
-                })
-            } />
+            <EloRanking items={ranking} />
         );
     }
 }
 
-async function GuessButtons({ rankingId }: { rankingId: string }) {
+async function GlobalLeaderboard({ rankingId }: { rankingId: number }) {
+    const globalLeaderboard = await getRankingItems(rankingId);
+    return <EloRanking items={globalLeaderboard} />
+}
+
+async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number, publicRankingId: string }) {
     let index: number;
 
     const session = await getServerSession(authOptions);
 
-    if (session) {
-        let v = await prisma.userRankingItemChoiceIndex.upsert({
-            where: {
-                userId_rankingId: {
-                    userId: session.user.id,
-                    rankingId,
-                }
-            },
-            update: {},
-            create: {
+    if (session && session.user && session.user.id) {
+        await db
+            .insertInto("UserRankingItemChoiceIndex")
+            .ignore()
+            .values({
                 userId: session.user.id,
                 rankingId,
-                index: 0,
-            }
-        });
+            })
+            .execute();
+
+        let v = await db
+            .selectFrom("UserRankingItemChoiceIndex")
+            .select("index")
+            .where("userId", "=", session.user.id)
+            .where("rankingId", "=", rankingId)
+            .executeTakeFirstOrThrow();
 
         index = v.index;
     } else {
         index = 0;
     }
 
-    let count = await prisma.rankingItem.count({
-        where: {
-            rankingId
-        }
-    });
+    let choices = await getRankingItems(rankingId);
+    choices.sort((a, b) => a.name > b.name ? 1 : -1); // required to make ordering consistent
 
     try {
-        const pair = getPairByIndex(count, index);
-
-        let options = await prisma.$transaction([
-            prisma.rankingItem.findFirst({
-                skip: pair[0],
-                where: {
-                    rankingId
-                },
-                orderBy: {
-                    id: "desc",
-                }
-            }),
-
-            prisma.rankingItem.findFirst({
-                skip: pair[1],
-                where: {
-                    rankingId
-                },
-                orderBy: {
-                    id: "desc",
-                }
-            })
-        ]) as unknown as RankingItem[];
-
-        if (!options[0] || !options[1]) return null;
-
+        const pair = getPairByIndex(choices.length, index);
         return (
-            <GuessButtonContainer options={options} rankingId={rankingId} />
+            <GuessButtonContainer options={[choices[pair[0]], choices[pair[1]]]} rankingId={publicRankingId} />
         );
     } catch (e) {
         return (
@@ -116,24 +87,34 @@ async function GuessButtons({ rankingId }: { rankingId: string }) {
     }
 }
 
-export default async function Ranking({ params }: { params: { id: string } }) {
-    const session = await getServerSession(authOptions);
+const getRanking = cache(async (id: string) => {
+    return await db
+        .selectFrom("Ranking")
+        .innerJoin("User", "User.id", "Ranking.userId")
+        .select("Ranking.id")
+        .select("Ranking.publicId")
+        .select("Ranking.name")
+        .select("Ranking.description")
+        .select("User.name as username")
+        .where("Ranking.publicId", "=", id)
+        .executeTakeFirst();
+});
 
-    const ranking = await prisma.ranking.findUnique({
-        select: {
-            name: true,
-            description: true,
-            user: true,
-            RankingItem: {
-                orderBy: {
-                    globalElo: "desc"
-                }
-            }
-        },
-        where: {
-            id: params.id
-        }
-    });
+export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+    const ranking = await getRanking(params.id);
+
+    if (!ranking) notFound();
+
+    return {
+        title: ranking.name,
+        description: ranking.description
+    };
+}
+
+export default async function Ranking({ params }: { params: { id: string } }) {
+    const ranking = await getRanking(params.id);
 
     if (!ranking) notFound();
 
@@ -144,7 +125,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
                     {ranking.name}
                 </h1>
                 <span className='text-neutral-500'>
-                    {ranking.user.name}
+                    {ranking.username}
                 </span>
             </div>
 
@@ -152,23 +133,25 @@ export default async function Ranking({ params }: { params: { id: string } }) {
                 {ranking.description}
             </p>
 
-            <GuessButtons rankingId={params.id} />
+            <Suspense fallback={<LoadingGuessButtons />}>
+                <GuessButtons rankingId={ranking.id} publicRankingId={params.id} />
+            </Suspense>
 
             <div className="grid grid-cols-10 w-full gap-4">
                 <div className="col-start-3 col-end-6">
                     <h2 className="font-bold text-lg">Local Leaderboard</h2>
 
-                    <LocalLeaderboard rankingId={params.id} />
+                    <Suspense>
+                        <LocalLeaderboard rankingId={ranking.id} />
+                    </Suspense>
                 </div>
 
                 <div className="col-start-6 col-end-9">
                     <h2 className="font-bold text-lg">Global Leaderboard</h2>
 
-                    <EloRanking items={
-                        ranking.RankingItem.map(item => {
-                            return { elo: item.globalElo, name: item.text }
-                        })
-                    } />
+                    <Suspense>
+                        <GlobalLeaderboard rankingId={ranking.id} />
+                    </Suspense>
                 </div>
             </div>
         </div>

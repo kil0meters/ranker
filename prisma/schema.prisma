@@ -1,8 +1,10 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-generator client {
-    provider = "prisma-client-js"
+generator kysely {
+    provider = "prisma-kysely"
+    output   = "../src/db"
+    fileName = "types.ts"
 }
 
 datasource db {
@@ -13,7 +15,7 @@ datasource db {
 }
 
 model Account {
-    id                String  @id @default(cuid())
+    id                String  @id @default("(UUID())")
     userId            String
     type              String
     provider          String
@@ -32,7 +34,7 @@ model Account {
 }
 
 model User {
-    id                         String                       @id @default(cuid())
+    id                         String                       @id @default("(UUID())")
     name                       String?
     email                      String?                      @unique
     emailVerified              DateTime?
@@ -44,8 +46,9 @@ model User {
 }
 
 model Ranking {
-    id          String  @id @unique @default(cuid())
+    id          Int     @id @default(autoincrement())
     userId      String
+    publicId    String  @unique
     name        String  @db.VarChar(200)
     description String? @db.Text
     popularity  Int     @default(1)
@@ -62,8 +65,9 @@ model Ranking {
 }
 
 model RankingItem {
-    id        String  @id @unique @default(cuid())
-    rankingId String
+    id        Int     @id @unique @default(autoincrement())
+    rankingId Int
+    publicId  String  @unique
     text      String  @db.Text
     imageUrl  String?
     globalElo Int     @default(1000)
@@ -76,7 +80,7 @@ model RankingItem {
 
 model UserRankingItemElo {
     userId        String
-    rankingItemId String
+    rankingItemId Int
     elo           Int    @default(1000)
 
     user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -90,7 +94,7 @@ model UserRankingItemElo {
 
 model UserRankingItemChoiceIndex {
     userId    String
-    rankingId String
+    rankingId Int
     index     Int    @default(0)
 
     user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
