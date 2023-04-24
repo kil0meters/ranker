@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
+
+
 
 export const runtime = "experimental-edge";
 
@@ -42,6 +44,7 @@ export default function NewRanking() {
 
     const addItem = () => {
         setItems([...items, ""]);
+        setFocusIndex(items.length);
     };
 
     const removeItem = (index: number) => {
@@ -53,6 +56,53 @@ export default function NewRanking() {
         const newItems = items.map((item, i) => (i === index ? value : item));
         setItems(newItems);
     };
+
+    const addItemOnEnter = (e: React.KeyboardEvent<HTMLInputElement>, currentIndex: number) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+      
+          const emptyIndexBelow = items.findIndex((item, index) => index > currentIndex && item.trim() === "");
+      
+          if (emptyIndexBelow !== -1) {
+            setFocusIndex(emptyIndexBelow);
+          } else {
+            addItem();
+          }
+        }
+      };
+      
+    const [focusIndex, setFocusIndex] = useState<number | null>(null);
+
+    const removeItemOnBackspace = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        const inputIsEmpty = e.currentTarget.value === "";
+      
+        if (e.key === "Backspace" && inputIsEmpty && items.length > 1) {
+          e.preventDefault();
+          let newIndex: number | null = null;
+          if (index > 0) {
+            newIndex = index - 1;
+          } else if (index === 0 && items.length > 1) {
+            newIndex = index;
+          }
+          removeItem(index);
+          setFocusIndex(newIndex);
+        }
+      };
+       
+    useLayoutEffect(() => {
+        if (focusIndex !== null && focusIndex < items.length) {
+            const inputRef = document.getElementById(`item-${focusIndex}`);
+            if (inputRef) {
+                (inputRef as HTMLInputElement).focus();
+                (inputRef as HTMLInputElement).setSelectionRange(
+                    (inputRef as HTMLInputElement).value.length,
+                    (inputRef as HTMLInputElement).value.length
+                );
+            }
+        }
+    }, [focusIndex, items.length]);
+
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     return (
         <main className="container mx-auto">
@@ -69,9 +119,15 @@ export default function NewRanking() {
                 {items.map((item, index) => (
                     <div key={index} className="flex items-center">
                         <Input
+                            id={`item-${index}`}
                             className="flex-grow"
                             value={item}
                             onChange={(e) => updateItem(e.target.value, index)}
+                            onKeyDown={(e) => {
+                                removeItemOnBackspace(e, index);
+                                addItemOnEnter(e, index);
+                            }}
+                            onFocus={() => setFocusIndex(index)}
                             type="text"
                             placeholder={`Item ${index + 1}`}
                         />
@@ -80,7 +136,7 @@ export default function NewRanking() {
                             className="ml-2 text-2xl aspect-square"
                             onClick={() => removeItem(index)}
                         >
-                            ⨯
+                            <span style={{position: 'relative', top: '-4px'}}>⨯</span>
                         </Button>
                     </div>
                 ))}
