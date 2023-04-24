@@ -137,8 +137,8 @@ export default async function Ranking({ params }: { params: { id: string } }) {
                 <GuessButtons rankingId={ranking.id} publicRankingId={params.id} />
             </Suspense>
 
-            <div className="grid grid-cols-10 w-full gap-4">
-                <div className="col-start-3 col-end-6">
+            <div className="w-[60%] mx-auto flex flex-col md:flex-row gap-4">
+                <div className="col-start-3 col-end-6 flex-grow">
                     <h2 className="font-bold text-lg">Local Leaderboard</h2>
 
                     <Suspense>
@@ -146,7 +146,7 @@ export default async function Ranking({ params }: { params: { id: string } }) {
                     </Suspense>
                 </div>
 
-                <div className="col-start-6 col-end-9">
+                <div className="col-start-6 col-end-9 flex-grow">
                     <h2 className="font-bold text-lg">Global Leaderboard</h2>
 
                     <Suspense>

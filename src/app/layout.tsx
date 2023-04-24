@@ -2,58 +2,14 @@ import Link from 'next/link'
 import { ClerkProvider, currentUser } from "@clerk/nextjs/app-beta";
 import './globals.css'
 import Image from "next/image";
-import rankerLogo from "../../public/Ranker.svg";
 import { Button } from '@/components/ui/button';
 import { SignOutButton } from './sign-out';
+import { Header } from './header';
 
 export const metadata = {
     title: 'Ranker',
     description: 'Rank things',
 }
-
-async function Header() {
-    const session = await currentUser();
-
-    return (
-        <nav className='border-b border-neutral-300 p-4 w-full mb-4 fixed backdrop-blur bg-white/50 shadow-white'>
-            <div className='container mx-auto flex justify-between items-center'>
-                <Link href={"/"} className='font-bold text-lg hover:underline flex items-center gap-2'>
-                    <Image
-                        priority
-                        src={rankerLogo}
-                        height={36}
-                        alt="Follow us on Twitter"
-                    />
-
-                    Ranker
-                </Link>
-                <div>
-                    {session
-                        ? (
-                            <div className='flex gap-4 items-center'>
-                                <span className='font-bold'>{session.firstName} {session.lastName}</span>
-                                <img className="inline h-9 w-9 rounded-full" src={session.profileImageUrl} alt='Logo' />
-
-                                <Button variant="default">
-                                    <Link href={"/new"} className='font-bold text-lg'>
-                                        New Ranking
-                                    </Link>
-                                </Button>
-
-                                <SignOutButton />
-                            </div>
-                        )
-                        : (
-                            <Link href={"/signin"} className='font-bold text-lg hover:underline'>
-                                Sign in
-                            </Link>
-                        )
-                    }
-                </div>
-            </div>
-        </nav>
-    );
-};
 
 function Footer() {
     return (
@@ -93,12 +49,18 @@ export default async function RootLayout({
 }: {
     children: React.ReactNode
 }) {
+    const session = await currentUser();
+
     return (
         <html lang="en" className='min-h-screen'>
             <body className='min-h-screen flex flex-col'>
                 <ClerkProvider>
-                    <Header />
-                    <main className='my-24'>{children}</main>
+                    <Header session={session ? {
+                        firstName: session.firstName!,
+                        lastName: session.lastName!,
+                        profileImageUrl: session.profileImageUrl
+                    } : null} />
+                    <main className='my-24 px-2 md:px-0'>{children}</main>
                     <Footer />
                 </ClerkProvider>
             </body>
