@@ -89,7 +89,7 @@ async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number,
 const getRanking = cache(async (id: string) => {
     return await db
         .selectFrom("Ranking")
-        .innerJoin("User", "User.id", "Ranking.userId")
+        .leftJoin("User", "User.id", "Ranking.userId")
         .select("Ranking.id")
         .select("Ranking.publicId")
         .select("Ranking.name")

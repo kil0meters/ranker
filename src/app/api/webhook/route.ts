@@ -34,7 +34,6 @@ export async function POST(
     };
 
     const verified = wh.verify(payload, heads) as any;
-    console.log(verified);
 
     if (verified.type === "user.created" || verified.type === "user.updated") {
         const values = {

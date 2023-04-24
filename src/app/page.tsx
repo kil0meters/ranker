@@ -26,11 +26,12 @@ export const runtime = "experimental-edge";
 async function ShowEntries() {
     const entries = await db
         .selectFrom("Ranking")
-        .innerJoin("User", "User.id", "Ranking.userId")
+        .leftJoin("User", "User.id", "Ranking.userId")
         .select("Ranking.publicId")
         .select("Ranking.name")
         .select("Ranking.description")
         .select("User.name as username")
+        .where("Ranking.private", "=", 0)
         .orderBy("createdAt", "desc")
         .limit(10)
         .execute();

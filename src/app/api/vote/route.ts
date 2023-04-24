@@ -27,8 +27,6 @@ export async function POST(res: Request) {
         .where("Ranking.publicId", "=", data.rankingId)
         .execute();
 
-    console.log(data);
-
     const rankingItems = [
         items.find((x) => x.publicId == data.choices[0])!,
         items.find((x) => x.publicId == data.choices[1])!,

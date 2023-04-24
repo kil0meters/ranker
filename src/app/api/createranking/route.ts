@@ -7,7 +7,7 @@ import { auth } from '@clerk/nextjs/app-beta';
 const schema = z.object({
     name: z.string().nonempty(),
     description: z.string().optional(),
-    items: z.array(z.string()).min(3)
+    items: z.array(z.string()).min(3),
 });
 
 export const runtime = "edge";
@@ -25,7 +25,7 @@ export async function POST(res: Request) {
                 publicId: nanoid(10),
                 description: data.description,
                 updatedAt: new Date(),
-                userId
+                userId,
             }).executeTakeFirstOrThrow();
 
         const id = Number(res.insertId);
