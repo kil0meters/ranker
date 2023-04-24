@@ -14,32 +14,11 @@ datasource db {
     relationMode      = "prisma"
 }
 
-model Account {
-    id                String  @id @default("(UUID())")
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? @db.Text
-    access_token      String? @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? @db.Text
-
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@unique([provider, providerAccountId])
-    @@index([userId])
-}
-
 model User {
-    id                         String                       @id @default("(UUID())")
-    name                       String?
-    email                      String?                      @unique
-    emailVerified              DateTime?
-    image                      String?
-    accounts                   Account[]
+    id       String @id
+    name     String
+    username String
+
     Ranking                    Ranking[]
     UserRankingItemElo         UserRankingItemElo[]
     UserRankingItemChoiceIndex UserRankingItemChoiceIndex[]
@@ -52,6 +31,7 @@ model Ranking {
     name        String  @db.VarChar(200)
     description String? @db.Text
     popularity  Int     @default(1)
+    private     Boolean @default(false)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

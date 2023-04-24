@@ -1,19 +1,18 @@
 import { db } from "@/dbconfig";
 import { notFound } from "next/navigation";
 import { EloRanking } from "./elo-ranking";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getPairByIndex } from "@/order";
 import { GuessButtonContainer } from "./guess-button";
 import { Suspense, cache } from "react";
 import { LoadingGuessButtons } from "./loading-guess-buttons";
 import { Metadata } from "next";
 import { getRankingItems } from "@/util";
+import { auth, currentUser } from "@clerk/nextjs/app-beta";
 
 async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
-    const session = await getServerSession(authOptions);
+    const { userId } = auth();
 
-    if (!session || !session.user) {
+    if (!userId) {
         return (
             <div className="bg-neutral-300 h-72 rounded flex">
                 <span className="mx-auto my-auto">
@@ -28,7 +27,7 @@ async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
             .select("text as name")
             .select("UserRankingItemElo.elo as elo")
             .where("rankingId", "=", rankingId)
-            .where("UserRankingItemElo.userId", "=", session.user.id)
+            .where("UserRankingItemElo.userId", "=", userId)
             .orderBy("elo", "desc")
             .execute();
 
@@ -46,14 +45,14 @@ async function GlobalLeaderboard({ rankingId }: { rankingId: number }) {
 async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number, publicRankingId: string }) {
     let index: number;
 
-    const session = await getServerSession(authOptions);
+    const { userId } = auth();
 
-    if (session && session.user && session.user.id) {
+    if (userId) {
         await db
             .insertInto("UserRankingItemChoiceIndex")
             .ignore()
             .values({
-                userId: session.user.id,
+                userId,
                 rankingId,
             })
             .execute();
@@ -61,7 +60,7 @@ async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number,
         let v = await db
             .selectFrom("UserRankingItemChoiceIndex")
             .select("index")
-            .where("userId", "=", session.user.id)
+            .where("userId", "=", userId)
             .where("rankingId", "=", rankingId)
             .executeTakeFirstOrThrow();
 
@@ -101,6 +100,7 @@ const getRanking = cache(async (id: string) => {
 });
 
 export const revalidate = 60;
+export const runtime = "experimental-edge";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
     const ranking = await getRanking(params.id);

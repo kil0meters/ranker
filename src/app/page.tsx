@@ -21,6 +21,8 @@ function DescriptionDisplay({ description }: { description: string | null }) {
     }
 }
 
+export const runtime = "experimental-edge";
+
 async function ShowEntries() {
     const entries = await db
         .selectFrom("Ranking")

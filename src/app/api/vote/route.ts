@@ -1,9 +1,8 @@
 import { db } from '@/dbconfig'
 import { z } from 'zod';
-import { getServerSession } from 'next-auth/next';
 import { NextResponse } from 'next/server';
-import { authOptions } from '../auth/[...nextauth]/route';
 import { updateRatings } from '@/elo';
+import { auth } from '@clerk/nextjs/app-beta';
 
 const schema = z.object({
     rankingId: z.string(),
@@ -11,11 +10,10 @@ const schema = z.object({
     index: z.number()
 });
 
+export const runtime = "edge";
 export async function POST(res: Request) {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) return NextResponse.error();
-
-    const now = performance.now();
+    const { userId } = auth();
+    if (!userId) return NextResponse.error();
 
     const data = schema.parse(await res.json());
 
@@ -41,11 +39,11 @@ export async function POST(res: Request) {
         .ignore()
         .values([
             {
-                userId: session.user.id,
+                userId: userId,
                 rankingItemId: rankingItems[0].id,
             },
             {
-                userId: session.user.id,
+                userId: userId,
                 rankingItemId: rankingItems[1].id,
             },
         ])
@@ -88,7 +86,7 @@ export async function POST(res: Request) {
         db
             .updateTable("UserRankingItemElo")
             .set({ elo: newLocalElos[0] })
-            .where("userId", "=", session.user.id)
+            .where("userId", "=", userId)
             .where((eb) => eb.cmpr("rankingItemId", "=", eb
                 .selectFrom("RankingItem")
                 .select("id")
@@ -98,7 +96,7 @@ export async function POST(res: Request) {
         db
             .updateTable("UserRankingItemElo")
             .set({ elo: newLocalElos[1] })
-            .where("userId", "=", session.user.id)
+            .where("userId", "=", userId)
             .where((eb) => eb.cmpr("rankingItemId", "=", eb
                 .selectFrom("RankingItem")
                 .select("id")
@@ -110,9 +108,6 @@ export async function POST(res: Request) {
             .set(eb => ({ index: eb.bxp("index", "+", 1) }))
             .execute()
     ]);
-
-    const end = performance.now();
-    console.log(`time: ${end - now}`);
 
     return NextResponse.json({ success: true });
 }

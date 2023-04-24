@@ -3,19 +3,6 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
     ? ColumnType<S, I | undefined, U>
     : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
-export type Account = {
-    id: Generated<string>;
-    userId: string;
-    type: string;
-    provider: string;
-    providerAccountId: string;
-    refresh_token: string | null;
-    access_token: string | null;
-    expires_at: number | null;
-    token_type: string | null;
-    scope: string | null;
-    id_token: string | null;
-};
 export type Ranking = {
     id: Generated<number>;
     userId: string;
@@ -23,6 +10,7 @@ export type Ranking = {
     name: string;
     description: string | null;
     popularity: Generated<number>;
+    private: Generated<number>;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
@@ -35,11 +23,9 @@ export type RankingItem = {
     globalElo: Generated<number>;
 };
 export type User = {
-    id: Generated<string>;
-    name: string | null;
-    email: string | null;
-    emailVerified: Timestamp | null;
-    image: string | null;
+    id: string;
+    name: string;
+    username: string;
 };
 export type UserRankingItemChoiceIndex = {
     userId: string;
@@ -52,7 +38,6 @@ export type UserRankingItemElo = {
     elo: Generated<number>;
 };
 export type DB = {
-    Account: Account;
     Ranking: Ranking;
     RankingItem: RankingItem;
     User: User;

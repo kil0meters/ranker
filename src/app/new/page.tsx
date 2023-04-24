@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+export const runtime = "experimental-edge";
+
 export default function NewRanking() {
     const router = useRouter();
 
@@ -14,21 +16,28 @@ export default function NewRanking() {
     const [description, setDescription] = useState("");
     const [items, setItems] = useState<string[]>([]);
 
+    const [loading, setLoading] = useState(false);
+
     const createPost = async () => {
-        if (items.length > 0 && items[items.length - 1] === "") {
-            items.pop();
+        if (loading) return;
+
+        const itemsFiltered = items.filter(item => item.trim() !== "");
+        setLoading(true);
+
+        try {
+            const data: { id: string } = await (await fetch("/api/createranking", {
+                method: "POST",
+                body: JSON.stringify({
+                    name,
+                    description,
+                    items: itemsFiltered
+                })
+            })).json();
+
+            router.push(`/rank/${data.id}`);
+        } catch {
+            setLoading(false);
         }
-
-        const data: { id: string } = await (await fetch("/api/createranking", {
-            method: "POST",
-            body: JSON.stringify({
-                name,
-                description,
-                items
-            })
-        })).json();
-
-        router.push(`/rank/${data.id}`);
     };
 
     const addItem = () => {
@@ -82,7 +91,7 @@ export default function NewRanking() {
                     Add Item
                 </button>
 
-                <Button onClick={createPost}>Submit</Button>
+                <Button onClick={createPost} className={loading ? "animate-pulse" : ""}>Submit</Button>
             </div>
         </main >
     )

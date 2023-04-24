@@ -1,9 +1,8 @@
 import { db } from '@/dbconfig';
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { authOptions } from '../auth/[...nextauth]/route';
 import { nanoid } from 'nanoid';
+import { auth } from '@clerk/nextjs/app-beta';
 
 const schema = z.object({
     name: z.string().nonempty(),
@@ -11,9 +10,10 @@ const schema = z.object({
     items: z.array(z.string()).min(3)
 });
 
+export const runtime = "edge";
 export async function POST(res: Request) {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) return NextResponse.error();
+    const { userId } = auth();
+    if (!userId) return NextResponse.error();
 
     const data = schema.parse(await res.json());
 
@@ -25,7 +25,7 @@ export async function POST(res: Request) {
                 publicId: nanoid(10),
                 description: data.description,
                 updatedAt: new Date(),
-                userId: session.user.id
+                userId
             }).executeTakeFirstOrThrow();
 
         const id = Number(res.insertId);
