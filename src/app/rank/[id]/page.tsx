@@ -79,6 +79,7 @@ async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number,
             <GuessButtonContainer options={[choices[pair[0]], choices[pair[1]]]} rankingId={publicRankingId} />
         );
     } catch (e) {
+        console.log(e);
         return (
             <div className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 max-w-lg rounded-lg mx-auto p-8 shadow-md">
                 <span className="text-6xl font-bolder">You rated everything. 😊</span>

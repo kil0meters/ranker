@@ -106,6 +106,7 @@ export async function POST(res: Request) {
 
         db
             .updateTable("UserRankingItemChoiceIndex")
+            .where("userId", "=", userId)
             .set(eb => ({ index: eb.bxp("index", "+", 1) }))
             .execute()
     ]);
