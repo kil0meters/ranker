@@ -27,6 +27,8 @@ export async function POST(res: Request) {
         .where("Ranking.publicId", "=", data.rankingId)
         .execute();
 
+    console.log(data);
+
     const rankingItems = [
         items.find((x) => x.publicId == data.choices[0])!,
         items.find((x) => x.publicId == data.choices[1])!,
@@ -53,6 +55,7 @@ export async function POST(res: Request) {
         .selectFrom("UserRankingItemElo")
         .select("elo")
         .select("rankingItemId")
+        .where("userId", "=", userId)
         .where((eb) => eb.or([
             eb.cmpr("rankingItemId", "=", rankingItems[0].id),
             eb.cmpr("rankingItemId", "=", rankingItems[1].id),
