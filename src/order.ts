@@ -22,8 +22,7 @@ function generateSeededRandomPairs(N: number, seed: number): number[][] {
     return shuffledPairs;
 }
 
-export function getPairByIndex(N: number, index: number): number[] {
-    const seed = 42; //Arbitrary seed
+export function getPairByIndex(N: number, index: number, seed: number): number[] {
     const totalPairs = N * (N - 1) / 2; //Equivilant of C(n,2)
     if (index < 0 || index >= totalPairs) {
         throw new Error("Index out of range");

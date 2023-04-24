@@ -6,7 +6,7 @@ import { GuessButtonContainer } from "./guess-button";
 import { Suspense, cache } from "react";
 import { LoadingGuessButtons } from "./loading-guess-buttons";
 import { Metadata } from "next";
-import { getRankingItems } from "@/util";
+import { getRankingItems, hashString } from "@/util";
 import { auth, currentUser } from "@clerk/nextjs/app-beta";
 
 async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
@@ -73,7 +73,7 @@ async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number,
     choices.sort((a, b) => a.name > b.name ? 1 : -1); // required to make ordering consistent
 
     try {
-        const pair = getPairByIndex(choices.length, index);
+        const pair = getPairByIndex(choices.length, index, userId ? hashString(userId) : 0);
         return (
             <GuessButtonContainer options={[choices[pair[0]], choices[pair[1]]]} rankingId={publicRankingId} />
         );
