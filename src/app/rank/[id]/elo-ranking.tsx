@@ -1,6 +1,6 @@
 type EloRankingItem = {
     elo: number;
-    name: string;
+    text: string;
 };
 
 export async function EloRanking({ items }: { items: EloRankingItem[] }) {
@@ -18,7 +18,7 @@ export async function EloRanking({ items }: { items: EloRankingItem[] }) {
                 {items.map((item, i) =>
                     <tr className="group" key={i}>
                         <td className="group-last-of-type:rounded-bl border border-neutral-300 p-2">{i + 1}</td>
-                        <td className="border border-neutral-300 p-2">{item.name}</td>
+                        <td className="border border-neutral-300 p-2">{item.text}</td>
                         <td className="group-last-of-type:rounded-br border border-neutral-300 p-2">{item.elo}</td>
                     </tr>
                 )}

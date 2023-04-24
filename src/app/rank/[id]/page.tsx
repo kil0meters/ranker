@@ -7,7 +7,7 @@ import { Suspense, cache } from "react";
 import { LoadingGuessButtons } from "./loading-guess-buttons";
 import { Metadata } from "next";
 import { getRankingItems, hashString } from "@/util";
-import { auth, currentUser } from "@clerk/nextjs/app-beta";
+import { auth } from "@clerk/nextjs/app-beta";
 
 async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
     const { userId } = auth();
@@ -24,7 +24,7 @@ async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
         const ranking = await db
             .selectFrom("RankingItem")
             .innerJoin("UserRankingItemElo", "UserRankingItemElo.rankingItemId", "RankingItem.id")
-            .select("text as name")
+            .select("text")
             .select("UserRankingItemElo.elo as elo")
             .where("rankingId", "=", rankingId)
             .where("UserRankingItemElo.userId", "=", userId)
@@ -39,6 +39,7 @@ async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
 
 async function GlobalLeaderboard({ rankingId }: { rankingId: number }) {
     const globalLeaderboard = await getRankingItems(rankingId);
+    console.log(globalLeaderboard);
     return <EloRanking items={globalLeaderboard} />
 }
 
@@ -69,8 +70,8 @@ async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number,
         index = 0;
     }
 
-    let choices = await getRankingItems(rankingId);
-    choices.sort((a, b) => a.name > b.name ? 1 : -1); // required to make ordering consistent
+    let choices = [...await getRankingItems(rankingId)];
+    choices.sort((a, b) => a.text > b.text ? 1 : -1); // required to make ordering consistent
 
     try {
         const pair = getPairByIndex(choices.length, index, userId ? hashString(userId) : 0);

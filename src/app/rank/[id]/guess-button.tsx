@@ -6,7 +6,7 @@ import { GuessButton } from './guess-button2';
 import { LoadingGuessButtons } from './loading-guess-buttons';
 
 export type ButtonOption = {
-    name: string,
+    text: string,
     publicId: string,
 }
 
