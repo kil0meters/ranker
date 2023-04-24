@@ -47,7 +47,7 @@ export function GuessButtonContainer({ rankingId, options }: GuessButtonContaine
         );
     } else {
         return (
-            <div className="grid grid-cols-2 w-full gap-8 mb-4 aspect-[32/9]">
+            <div className="grid grid-cols-2 w-full gap-2 md:gap-8 mb-4 aspect-[32/9]">
                 <GuessButton index={0} options={options} onClick={() => query(0)} />
                 <GuessButton index={1} options={options} onClick={() => query(1)} />
             </div>

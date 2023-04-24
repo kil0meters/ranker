@@ -1,7 +1,6 @@
 import { db } from "@/dbconfig";
 import Link from "next/link";
-
-export const revalidate = 60;
+import { Suspense } from "react";
 
 function DescriptionDisplay({ description }: { description: string | null }) {
     if (!description) return null;
@@ -22,6 +21,7 @@ function DescriptionDisplay({ description }: { description: string | null }) {
 }
 
 export const runtime = "experimental-edge";
+export const revalidate = 60;
 
 async function ShowEntries() {
     const entries = await db
@@ -58,7 +58,9 @@ async function ShowEntries() {
 export default function Home() {
     return (
         <main className="container mx-auto">
-            <ShowEntries />
+            <Suspense>
+                <ShowEntries />
+            </Suspense>
         </main>
     );
 }

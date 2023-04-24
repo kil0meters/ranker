@@ -115,47 +115,56 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     };
 }
 
-export default async function Ranking({ params }: { params: { id: string } }) {
-    const ranking = await getRanking(params.id);
+async function RankingInner({ id }: { id: string }) {
+    const ranking = await getRanking(id);
 
     if (!ranking) notFound();
 
+    return <>
+        <div>
+            <h1 className='text-2xl font-extrabold'>
+                {ranking.name}
+            </h1>
+            <span className='text-neutral-500'>
+                {ranking.username}
+            </span>
+        </div>
+
+        <p>
+            {ranking.description}
+        </p>
+
+        <Suspense fallback={<LoadingGuessButtons />}>
+            <GuessButtons rankingId={ranking.id} publicRankingId={id} />
+        </Suspense>
+
+        <div className="w-full md:w-[80%] lg:w-[60%] mx-auto flex flex-col md:flex-row gap-4">
+            <div className="col-start-3 col-end-6 flex-grow">
+                <h2 className="font-bold text-lg">Local Leaderboard</h2>
+
+                <Suspense>
+                    <LocalLeaderboard rankingId={ranking.id} />
+                </Suspense>
+            </div>
+
+            <div className="col-start-6 col-end-9 flex-grow">
+                <h2 className="font-bold text-lg">Global Leaderboard</h2>
+
+                <Suspense>
+                    <GlobalLeaderboard rankingId={ranking.id} />
+                </Suspense>
+            </div>
+        </div>
+    </>;
+}
+
+export default async function Ranking({ params }: { params: { id: string } }) {
+
     return (
         <div className='mx-auto container flex flex-col gap-4'>
-            <div>
-                <h1 className='text-2xl font-extrabold'>
-                    {ranking.name}
-                </h1>
-                <span className='text-neutral-500'>
-                    {ranking.username}
-                </span>
-            </div>
-
-            <p>
-                {ranking.description}
-            </p>
-
-            <Suspense fallback={<LoadingGuessButtons />}>
-                <GuessButtons rankingId={ranking.id} publicRankingId={params.id} />
+            <Suspense>
+                <RankingInner id={params.id} />
             </Suspense>
-
-            <div className="w-[60%] mx-auto flex flex-col md:flex-row gap-4">
-                <div className="col-start-3 col-end-6 flex-grow">
-                    <h2 className="font-bold text-lg">Local Leaderboard</h2>
-
-                    <Suspense>
-                        <LocalLeaderboard rankingId={ranking.id} />
-                    </Suspense>
-                </div>
-
-                <div className="col-start-6 col-end-9 flex-grow">
-                    <h2 className="font-bold text-lg">Global Leaderboard</h2>
-
-                    <Suspense>
-                        <GlobalLeaderboard rankingId={ranking.id} />
-                    </Suspense>
-                </div>
-            </div>
         </div>
     );
 }
