@@ -3,7 +3,7 @@ import { db } from "@/dbconfig";
 
 const webhookSecret: string = process.env.WEBHOOK_SECRET!;
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 function formatName(first: string, last: string, username: string): string {
     if (!last && !first) {
