@@ -3,7 +3,7 @@ import { db } from "@/dbconfig";
 
 const webhookSecret: string = process.env.WEBHOOK_SECRET!;
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 function formatName(first: string, last: string, username: string): string {
     if (!last && !first) {
@@ -42,7 +42,7 @@ export async function POST(
             username: verified.data.username as string
         };
 
-        await db.insertInto("User").ignore().values(values).onDuplicateKeyUpdate(values).execute();
+        await db.insertInto("User").values(values).onDuplicateKeyUpdate(values).execute();
     }
 
     return new Response("", {
