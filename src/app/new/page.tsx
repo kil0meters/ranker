@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { useState, useLayoutEffect, useRef } from "react";
+import { useState, useLayoutEffect, useRef, useCallback, useMemo } from "react";
+import './exclamation-mark.css';
 
 
 
@@ -109,6 +110,22 @@ export default function NewRanking() {
 
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+    const hasDuplicates = useCallback((arr: string[]) => {
+        return new Set(arr).size !== arr.length;
+    }, []);
+
+    const isDuplicate = useCallback((itemValue: string) => {
+        if (itemValue.trim() === "") {
+            return false;
+        }
+        const occurrences = items.filter((item) => item.trim().toLowerCase() === itemValue.trim().toLowerCase()).length;
+        return occurrences > 1;
+        },
+        [items]
+    );
+
+    const hasDuplicateItems = useMemo(() => hasDuplicates(items), [hasDuplicates, items]);
+
     return (
         <main className="container mx-auto">
             <div className='flex grid-cols-2 gap-4 border-neutral-300 rounded p-4 flex-col border'>
@@ -122,10 +139,10 @@ export default function NewRanking() {
 
                 <Label htmlFor="items">Items</Label>
                 {items.map((item, index) => (
-                    <div key={index} className="flex items-center">
+                    <div key={index} className="flex items-center relative">
                         <Input
                             id={`item-${index}`}
-                            className="flex-grow"
+                            className={`flex-grow ${isDuplicate(item) ? "border-red-500 border-2" : ""}`}
                             value={item}
                             onChange={(e) => updateItem(e.target.value, index)}
                             onKeyDown={(e) => {
@@ -136,6 +153,9 @@ export default function NewRanking() {
                             type="text"
                             placeholder={`Item ${index + 1}`}
                         />
+                        {isDuplicate(item) && (
+                            <span className="exclamation-mark">!&#x20DD;</span>
+                        )}
                         <Button
                             variant="destructive"
                             className="ml-2 text-2xl aspect-square"
@@ -151,8 +171,9 @@ export default function NewRanking() {
                 >
                     Add Item
                 </button>
-
-                <Button onClick={createPost} className={loading ? "animate-pulse" : ""}>Submit</Button>
+                <Button onClick={createPost} className={`${loading ? "animate-pulse" : ""} ${hasDuplicateItems ? "opacity-50" : ""}`} disabled={hasDuplicateItems}>
+                    Submit
+                </Button>
             </div>
         </main >
     )

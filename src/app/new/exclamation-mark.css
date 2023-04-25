@@ -1,0 +1,11 @@
+.exclamation-mark {
+  position: absolute;
+  right: 55px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.4rem;
+  color: red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
