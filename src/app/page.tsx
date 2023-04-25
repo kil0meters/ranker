@@ -30,11 +30,14 @@ async function ShowEntries() {
         .select("Ranking.publicId")
         .select("Ranking.name")
         .select("Ranking.description")
+        .select("Ranking.private")
         .select("User.name as username")
         .where("Ranking.private", "=", 0)
         .orderBy("createdAt", "desc")
         .limit(10)
         .execute();
+
+    console.log(entries);
 
     return (
         <div className='grid grid-cols-1 grid-flow-row border-neutral-300 rounded border shadow-lg'>

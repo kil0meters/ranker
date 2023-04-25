@@ -8,6 +8,7 @@ const schema = z.object({
     name: z.string().nonempty(),
     description: z.string().optional(),
     items: z.array(z.string()).min(3),
+    isPrivate: z.boolean().default(false)
 });
 
 export const runtime = "edge";
@@ -16,6 +17,9 @@ export async function POST(res: Request) {
     if (!userId) return NextResponse.error();
 
     const data = schema.parse(await res.json());
+
+    console.log(data);
+    console.log(Number(data.isPrivate));
 
     const ranking = await db.transaction().execute(async (tx) => {
         const res = await tx
@@ -26,6 +30,7 @@ export async function POST(res: Request) {
                 description: data.description,
                 updatedAt: new Date(),
                 userId,
+                private: Number(data.isPrivate)
             }).executeTakeFirstOrThrow();
 
         const id = Number(res.insertId);

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useState, useLayoutEffect, useRef, useCallback, useMemo } from "react";
 import './exclamation-mark.css';
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 
@@ -18,6 +19,7 @@ export default function NewRanking() {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [items, setItems] = useState<string[]>([""]);
+    const [isPrivate, setIsPrivate] = useState(false);
 
     const [loading, setLoading] = useState(false);
 
@@ -33,7 +35,8 @@ export default function NewRanking() {
                 body: JSON.stringify({
                     name,
                     description,
-                    items: itemsFiltered
+                    items: itemsFiltered,
+                    isPrivate
                 })
             })).json();
 
@@ -53,7 +56,7 @@ export default function NewRanking() {
             updateItem("", index);
             return;
         }
-    
+
         const newItems = items.filter((_, i) => i !== index);
         setItems(newItems);
     };
@@ -65,36 +68,36 @@ export default function NewRanking() {
 
     const addItemOnEnter = (e: React.KeyboardEvent<HTMLInputElement>, currentIndex: number) => {
         if (e.key === "Enter") {
-          e.preventDefault();
-      
-          const emptyIndexBelow = items.findIndex((item, index) => index > currentIndex && item.trim() === "");
-      
-          if (emptyIndexBelow !== -1) {
-            setFocusIndex(emptyIndexBelow);
-          } else {
-            addItem();
-          }
+            e.preventDefault();
+
+            const emptyIndexBelow = items.findIndex((item, index) => index > currentIndex && item.trim() === "");
+
+            if (emptyIndexBelow !== -1) {
+                setFocusIndex(emptyIndexBelow);
+            } else {
+                addItem();
+            }
         }
-      };
-      
+    };
+
     const [focusIndex, setFocusIndex] = useState<number | null>(null);
 
     const removeItemOnBackspace = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
         const inputIsEmpty = e.currentTarget.value === "";
-      
+
         if (e.key === "Backspace" && inputIsEmpty && items.length > 1) {
-          e.preventDefault();
-          let newIndex: number | null = null;
-          if (index > 0) {
-            newIndex = index - 1;
-          } else if (index === 0 && items.length > 1) {
-            newIndex = index;
-          }
-          removeItem(index);
-          setFocusIndex(newIndex);
+            e.preventDefault();
+            let newIndex: number | null = null;
+            if (index > 0) {
+                newIndex = index - 1;
+            } else if (index === 0 && items.length > 1) {
+                newIndex = index;
+            }
+            removeItem(index);
+            setFocusIndex(newIndex);
         }
-      };
-       
+    };
+
     useLayoutEffect(() => {
         if (focusIndex !== null && focusIndex < items.length) {
             const inputRef = document.getElementById(`item-${focusIndex}`);
@@ -108,8 +111,6 @@ export default function NewRanking() {
         }
     }, [focusIndex, items.length]);
 
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
     const hasDuplicates = useCallback((arr: string[]) => {
         return new Set(arr).size !== arr.length;
     }, []);
@@ -120,7 +121,7 @@ export default function NewRanking() {
         }
         const occurrences = items.filter((item) => item.trim().toLowerCase() === itemValue.trim().toLowerCase()).length;
         return occurrences > 1;
-        },
+    },
         [items]
     );
 
@@ -136,6 +137,11 @@ export default function NewRanking() {
 
                 <Label htmlFor="description">Description</Label>
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="description" />
+
+                <div className="flex items-center gap-2">
+                    <Checkbox id="private" value={isPrivate ? "checked" : "unchecked"} onClick={() => setIsPrivate(!isPrivate)} />
+                    <Label htmlFor="private">Private (only accessible through link)</Label>
+                </div>
 
                 <Label htmlFor="items">Items</Label>
                 {items.map((item, index) => (
@@ -161,7 +167,7 @@ export default function NewRanking() {
                             className="ml-2 text-2xl aspect-square"
                             onClick={() => removeItem(index)}
                         >
-                            <span style={{position: 'relative', top: '-4px'}}>⨯</span>
+                            <span style={{ position: 'relative', top: '-4px' }}>⨯</span>
                         </Button>
                     </div>
                 ))}
