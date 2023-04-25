@@ -1,12 +1,11 @@
 import { db } from "@/dbconfig";
 import { notFound } from "next/navigation";
 import { EloRanking } from "./elo-ranking";
-import { getPairByIndex } from "@/order";
-import { GuessButtonContainer } from "./guess-button";
+import { ClientGuessButtons } from "./guess-button";
 import { Suspense, cache } from "react";
 import { LoadingGuessButtons } from "./loading-guess-buttons";
 import { Metadata } from "next";
-import { getRankingItems, hashString } from "@/util";
+import { getRankingItems } from "@/util";
 import { auth } from "@clerk/nextjs/app-beta";
 
 async function LocalLeaderboard({ rankingId }: { rankingId: number }) {
@@ -45,8 +44,8 @@ async function GlobalLeaderboard({ rankingId }: { rankingId: number }) {
 
 async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number, publicRankingId: string }) {
     let index: number;
-
     const { userId } = auth();
+    const globalLeaderboard = await getRankingItems(rankingId);
 
     if (userId) {
         await db
@@ -70,22 +69,13 @@ async function GuessButtons({ rankingId, publicRankingId }: { rankingId: number,
         index = 0;
     }
 
-    let choices = [...await getRankingItems(rankingId)];
-    choices.sort((a, b) => a.text > b.text ? 1 : -1); // required to make ordering consistent
-
-    try {
-        const pair = getPairByIndex(choices.length, index, userId ? hashString(userId) : 0);
-        return (
-            <GuessButtonContainer options={[choices[pair[0]], choices[pair[1]]]} rankingId={publicRankingId} />
-        );
-    } catch (e) {
-        console.log(e);
-        return (
-            <div className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 max-w-lg rounded-lg mx-auto p-8 shadow-md">
-                <span className="text-6xl font-bolder">You rated everything. 😊</span>
-            </div>
-        );
-    }
+    return (
+        <ClientGuessButtons
+            publicRankingId={publicRankingId}
+            items={globalLeaderboard}
+            startIndex={index}
+        />
+    );
 }
 
 const getRanking = cache(async (id: string) => {
@@ -159,7 +149,6 @@ async function RankingInner({ id }: { id: string }) {
 }
 
 export default async function Ranking({ params }: { params: { id: string } }) {
-
     return (
         <div className='mx-auto container flex flex-col gap-4'>
             <Suspense>

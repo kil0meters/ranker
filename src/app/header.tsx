@@ -40,8 +40,8 @@ export function Header({ session }: { session: { firstName: string, lastName: st
                                 <span className='font-bold'>{session.firstName} {session.lastName}</span>
                             </div>
 
-                            <Link href={"/new"} className='block'>
-                                <Button variant="default" className="font-bold text-lg w-full" onClick={() => setHidden(true)}>
+                            <Link href={"/new"} className='font-bold text-lg'>
+                                <Button variant="default" className="font-bold text-lg">
                                     New Ranking
                                 </Button>
                             </Link>
